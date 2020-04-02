@@ -15,8 +15,11 @@
 ####################################################################################################################
 
 import os
+import sys
 import json
 import time
+from tqdm import tqdm
+from math import ceil
 import logging
 import urllib.request
 import urllib.error
@@ -27,6 +30,11 @@ from user_agent import generate_user_agent
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
+def file_len(fname):
+    with open(fname) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
 
 def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
     """get image links with selenium
@@ -40,8 +48,8 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
     Returns:
         None
     """
-    number_of_scrolls = int(num_requested / 400) + 2 
-    # number_of_scrolls * 400 images will be opened in the browser
+    number_of_scrolls = ceil(num_requested/700)
+    # 700 is currently arbitrary. It is an attempt to limit the images loaded.
 
     img_urls = set()
     driver = webdriver.Firefox()
@@ -50,25 +58,29 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
         url = "https://www.google.com/search?q="+search_query+"&source=lnms&tbm=isch"
         driver.get(url)
         for _ in range(number_of_scrolls): # Scroll down page
-            for __ in range(10):
-                # multiple scrolls needed to show all 400 images
+            for __ in range(2):
+                # multiple scrolls needed to show all images
                 driver.execute_script("window.scrollBy(0, 1000000)")
                 time.sleep(2)
-            # to load next 400 images
+            # to load next images
             time.sleep(1)
             try:
                 driver.find_element_by_xpath("//input[@value='Show more results']").click()
             except Exception as e:
-                print("Process-{0} reach the end of page or get the maximum number of requested images".format(main_keyword))
+                print(f"Process {main_keyword} reached the end of page")
                 break
 
         thumbs = driver.find_elements_by_xpath('//a[@class="wXeWr islib nfEiy mM5pbd"]')
 
-        print(len(thumbs))
-        for thumb in thumbs[:num_requested]:
+        # print(f"Number of thumbnails on screen: {len(thumbs)}") # Optional
+        
+        for i, thumb in enumerate(thumbs[:num_requested]):
+            sys.stdout.write(f"Finding URL's [{'#' * (i+1) + ' ' * (num_requested - i)}]   \r")
+            sys.stdout.flush() 
             try:
                 thumb.click()
-                time.sleep(1)
+                time.sleep(3.5) # This is wait time for the image to load in it's higher resolution 
+                                # so that the URL can be retrieved
             except e:
                 print("Error clicking one thumbnail")
 
@@ -81,10 +93,7 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
 
                 if url.startswith('http') and not url.startswith('https://encrypted-tbn0.gstatic.com'):
                     img_urls.add(url)
-                    print("Found image url: " + url)
-
-        print('Process-{0} add keyword {1} , got {2} image urls so far'.format(main_keyword, supplemented_keywords[i], len(img_urls)))
-    print('Process-{0} totally get {1} images'.format(main_keyword, len(img_urls)))
+                    
     driver.quit()
     
     # Defining link file path
@@ -93,7 +102,7 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
     with open(link_file_path, 'w') as wf:
         for url in img_urls:
             wf.write(url +'\n')
-    print('Store all the links in file {0}'.format(link_file_path))
+    print(f'Stored {len(img_urls)} links in {link_file_path}')
 
 
 def download_images(main_keyword):
@@ -112,7 +121,8 @@ def download_images(main_keyword):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     log_file = log_dir + 'download_selenium_{0}.log'.format(main_keyword)
-    logging.basicConfig(level=logging.DEBUG, filename=log_file, filemode="a+", format="%(asctime)-15s %(levelname)-8s  %(message)s")
+    logging.basicConfig(level=logging.DEBUG, filename=log_file, filemode="a+", 
+                        format="%(asctime)-15s %(levelname)-8s  %(message)s")
     download_dir='images'
     img_dir = download_dir + '/' + main_keyword + '/'
     count = 0
@@ -122,7 +132,9 @@ def download_images(main_keyword):
         
     # start to download images
     with open(link_file_path, 'r') as rf:
-        for link in rf:
+        for i, link in enumerate(rf):
+            sys.stdout.write(f"Downloading images [{'#' * (i+1) + ' ' * (file_len(link_file_path) - i)}]   \r")
+            sys.stdout.flush() 
             try:
                 o = urlparse(link)
                 ref = o.scheme + '://' + o.hostname
@@ -130,17 +142,17 @@ def download_images(main_keyword):
                 ua = generate_user_agent()
                 headers['User-Agent'] = ua
                 headers['referer'] = ref
-                print(f'\n{link.strip()}\n{ref}\n{ua}')
+                # print(f'\n{link.strip()}\n{ref}\n{ua}')
                 req = urllib.request.Request(link.strip(), headers = headers)
                 response = urllib.request.urlopen(req)
                 data = response.read()
                 file_path = img_dir + f'{count}.jpg'
                 with open(file_path,'wb') as wf:
                     wf.write(data)
-                print(f'Process-{main_keyword} download image {main_keyword}/{count}.jpg')
+                # print(f'Process-{main_keyword} download image {main_keyword}/{count}.jpg')
                 count += 1
                 if count % 10 == 0:
-                    print(f'Process-{main_keyword} is sleeping')
+                    #print(f'Process-{main_keyword} is sleeping')
                     time.sleep(5)
 
             except urllib.error.URLError as e:
@@ -155,6 +167,8 @@ def download_images(main_keyword):
                 print('Unexpected Error')
                 logging.error(f'Unexpeted error while downloading image {link}error type:{e.args}')
                 continue
+        downloaded_num = len(os.listdir(f"images/{main_keyword}"))
+        print(f"Successfully downloaded {downloaded_num} images")
                 
 def master_download(main_keyword, num_requested = 30, supplemented_keywords=[' ']):
     get_image_links(main_keyword, supplemented_keywords, num_requested)
