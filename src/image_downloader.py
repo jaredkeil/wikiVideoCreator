@@ -58,7 +58,7 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
             time.sleep(1)
             try:
                 driver.find_element_by_xpath("//input[@value='Show more results']").click()
-            except Exception as e:
+            except Exception:
                 print("Process-{0} reach the end of page or get the maximum number of requested images".format(main_keyword))
                 break
 
@@ -69,14 +69,14 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
             try:
                 thumb.click()
                 time.sleep(1)
-            except e:
+            except Exception:
                 print("Error clicking one thumbnail")
 
             url_elements = driver.find_elements_by_xpath('//img[@class="n3VNCb"]')
             for url_element in url_elements:
                 try:
                     url = url_element.get_attribute('src')
-                except e:
+                except Exception:
                     print("Error getting one url")
 
                 if url.startswith('http') and not url.startswith('https://encrypted-tbn0.gstatic.com'):
