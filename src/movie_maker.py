@@ -1,12 +1,14 @@
 from moviepy.editor import *
 import gizeh as gz
 from gtts import gTTS
-from wiki_scrape import parse_wiki
 from skimage.io import imread, imsave
 from skimage.transform import resize
 from skimage.util import img_as_ubyte
 import time
 from datetime import datetime
+
+from wiki_scrape import parse_wiki
+from image_downloader import *
 
 
 # Default Parameters
@@ -34,10 +36,10 @@ class WikiMovieMaker():
 
     def create_paths(self):
         # Directories
-        self.IMG_DIR = '../images/' + self.title + "/"
+        self.IMG_DIR = './images/' + self.title + "/"
         self.RESIZE_DIR = self.IMG_DIR + "/resize"
-        self.AUDIO_DIR = '../audio/'
-        self.VID_DIR = '../videos/'
+        self.AUDIO_DIR = './audio/'
+        self.VID_DIR = './videos/'
         # Paths
         self.AUDIO_PATH = self.AUDIO_DIR + self.title + ".mp3"
         self.VID_PATH = self.VID_DIR+ self.title + ".mp4"
@@ -60,22 +62,31 @@ class WikiMovieMaker():
         fnames =  [f for f in os.listdir(self.IMG_DIR) if not (f.startswith('.') or f == 'resize')]
         self.fixed_durations = [IMG_DISPLAY_DURATION for _ in fnames]
 
+    
         for fname in fnames:
             path = os.path.join(self.IMG_DIR, fname)
-            img_array = resize(imread(path), output_shape=IMG_SHAPE, mode='constant')
+            try:
+                img_array = resize(imread(path), output_shape=IMG_SHAPE, mode='constant')[:,:,:3]
+            except ValueError:
+                continue
             save_path = os.path.join(self.RESIZE_DIR, fname)
             self.final_img_paths.append(save_path)
             imsave(save_path, img_as_ubyte(img_array))
+
+        print(len(self.final_img_paths))
+        print(len(self.fixed_durations))
 
     def make_movie(self, cutoff=None):
 
         self.title, self.script = parse_wiki(self.main_keyword)
         if cutoff:
             self.script = self.script[:cutoff]
+
         self.create_paths()
         # Create TTS (Text-to-Speech) audio
         self.text_to_audioclip()
-        # Load and resize images
+        # Download and resize images
+        master_download(self.main_keyword)
         self.resize_images()
 
         # Create Video Clips
@@ -83,7 +94,7 @@ class WikiMovieMaker():
 
         image_sequence = ImageSequenceClip(sequence=self.final_img_paths,
                                   durations=self.fixed_durations,
-                                  load_images=True).\
+                                  load_images=False).\
                 set_position(('center', 400)).\
                 fx(vfx.loop, duration=self.DURATION).\
                 set_audio(self.audio_clip)
@@ -101,4 +112,4 @@ class WikiMovieMaker():
 if __name__ == "__main__":
 
     WMM = WikiMovieMaker('Badger')
-    WMM.make_movie(cutoff=100)
+    WMM.make_movie(cutoff=1000)
