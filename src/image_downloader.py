@@ -18,7 +18,6 @@ import os
 import sys
 import json
 import time
-from tqdm import tqdm
 from math import ceil
 import logging
 import urllib.request
