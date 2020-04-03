@@ -18,7 +18,7 @@ WHITE_GIZEH = (1, 1, 1)
 BLACK_GIZEH = (0, 0, 0)
 
 VIDEO_SIZE = (1920, 1080)
-IMG_SHAPE = (540, 960)
+IMG_SHAPE = (1080, 1920)
 IMG_DISPLAY_DURATION = 5    #duration, in seconds, to display each image
 
 class WikiMovieMaker():
@@ -77,7 +77,7 @@ class WikiMovieMaker():
         # Create TTS (Text-to-Speech) audio
         self.text_to_audioclip()
         # Download and resize images
-        # master_download(self.main_keyword)
+#         master_download(self.main_keyword)
         self.resize_images()
 
         # Create Video Clips
