@@ -1,6 +1,10 @@
 # Ignoring Images Directory
-/images
+*.jpg
 
+#Ignore virtual Environment
+youtube_upload/
+
+# 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
