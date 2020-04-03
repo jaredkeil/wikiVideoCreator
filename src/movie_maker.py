@@ -1,12 +1,14 @@
 from moviepy.editor import *
 import gizeh as gz
 from gtts import gTTS
-from wiki_scrape import parse_wiki
 from skimage.io import imread, imsave
-from skimage.transform import resize
+from skimage import transform
 from skimage.util import img_as_ubyte
 import time
 from datetime import datetime
+
+from wiki_scrape import parse_wiki
+from image_downloader import *
 
 
 # Default Parameters
@@ -17,27 +19,19 @@ BLACK_GIZEH = (0, 0, 0)
 
 VIDEO_SIZE = (1920, 1080)
 IMG_SHAPE = (540, 960)
-IMG_DISPLAY_DURATION = 10    #duration, in seconds, to display each image
+IMG_DISPLAY_DURATION = 5    #duration, in seconds, to display each image
 
 class WikiMovieMaker():
 
     def __init__(self, main_keyword):
         self.main_keyword = main_keyword
 
-    def render_text(self, t):
-        surface = gz.Surface(1920, 1080, bg_color=BLACK_GIZEH)
-        text = gz.text(
-            self.title, fontfamily="Helvetica",
-            fontsize=120, fontweight='bold', fill=WHITE_GIZEH, xy=(960, 400))
-        text.draw(surface)
-        return surface.get_npimage()
-
     def create_paths(self):
         # Directories
-        self.IMG_DIR = '../images/' + self.title + "/"
+        self.IMG_DIR = './images/' + self.title + "/"
         self.RESIZE_DIR = self.IMG_DIR + "/resize"
-        self.AUDIO_DIR = '../audio/'
-        self.VID_DIR = '../videos/'
+        self.AUDIO_DIR = './audio/'
+        self.VID_DIR = './videos/'
         # Paths
         self.AUDIO_PATH = self.AUDIO_DIR + self.title + ".mp3"
         self.VID_PATH = self.VID_DIR+ self.title + ".mp4"
@@ -45,8 +39,10 @@ class WikiMovieMaker():
         for d in [self.IMG_DIR, self.RESIZE_DIR, self.AUDIO_DIR, self.VID_DIR]:
             if not os.path.exists(d):
                 os.makedirs(d)
+                print(d, "directory created")
 
     def text_to_audioclip(self):
+        print("Converting text to speech. . . ")
         tts = gTTS(self.script, lang='en')
         tts.save(self.AUDIO_PATH)
         self.audio_clip = AudioFileClip(self.AUDIO_PATH)
@@ -60,9 +56,13 @@ class WikiMovieMaker():
         fnames =  [f for f in os.listdir(self.IMG_DIR) if not (f.startswith('.') or f == 'resize')]
         self.fixed_durations = [IMG_DISPLAY_DURATION for _ in fnames]
 
+        print("Resizing images. . .")
         for fname in fnames:
             path = os.path.join(self.IMG_DIR, fname)
-            img_array = resize(imread(path), output_shape=IMG_SHAPE, mode='constant')
+            try:
+                img_array = transform.resize(imread(path), output_shape=IMG_SHAPE, mode='constant')[:,:,:3]
+            except ValueError:
+                continue
             save_path = os.path.join(self.RESIZE_DIR, fname)
             self.final_img_paths.append(save_path)
             imsave(save_path, img_as_ubyte(img_array))
@@ -72,14 +72,26 @@ class WikiMovieMaker():
         self.title, self.script = parse_wiki(self.main_keyword)
         if cutoff:
             self.script = self.script[:cutoff]
+
         self.create_paths()
         # Create TTS (Text-to-Speech) audio
         self.text_to_audioclip()
-        # Load and resize images
+        # Download and resize images
+        # master_download(self.main_keyword)
         self.resize_images()
 
         # Create Video Clips
-        title_text = VideoClip(self.render_text, duration=3)
+        print("Creating clips. . .")
+        title_text = TextClip(self.title, color='white', fontsize=140, size=VIDEO_SIZE,
+                                method='caption').set_duration(2)
+
+        thanks = TextClip("Thanks for watching \n and listening",
+                            color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
+                            set_duration(2)
+
+        subscribe = TextClip("Please Subscribe!",
+                                color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
+                                set_duration(2)
 
         image_sequence = ImageSequenceClip(sequence=self.final_img_paths,
                                   durations=self.fixed_durations,
@@ -88,17 +100,20 @@ class WikiMovieMaker():
                 fx(vfx.loop, duration=self.DURATION).\
                 set_audio(self.audio_clip)
 
-        self.video = concatenate_videoclips([title_text, image_sequence], method='chain').\
-                    on_color(color=BLACK, col_opacity=1)
-        
+        self.video = concatenate_videoclips([title_text, image_sequence, thanks, subscribe],
+                                            method='compose').\
+                                            on_color(color=BLACK, col_opacity=1)
         # Encode Video
         start = datetime.now()
-        self.video.write_videofile(self.VID_PATH, fps=10, audio_codec="aac")
+        self.video.write_videofile(self.VID_PATH, fps=0.5, codec='mpeg4', audio_codec="aac")
         dur = datetime.now() - start
         print("Video Encoding completed in time: ", dur)
 
+        self.audio_clip.close()
+        title_text.close()
+        thanks.close()
+        subscribe.close()
 
 if __name__ == "__main__":
-
     WMM = WikiMovieMaker('Badger')
-    WMM.make_movie(cutoff=100)
+    WMM.make_movie(cutoff=300)

@@ -3,8 +3,8 @@
 # @Date:   2017-09-27 23:02:19
 # @Last Modified by:   Arthur 
 # @Last Modified time: 2020-03-11 15:36:58
-
-
+​
+​
 ####################################################################################################################
 # Download images from google with specified keywords for searching
 # search query is created by "main_keyword + supplemented_keyword"
@@ -13,7 +13,7 @@
 # allow single process or multiple processes for downloading
 # Pay attention that since selenium is used, geckodriver and firefox browser is required
 ####################################################################################################################
-
+​
 import os
 import sys
 import json
@@ -23,18 +23,18 @@ import logging
 import urllib.request
 import urllib.error
 from urllib.parse import urlparse, quote
-
+​
 from multiprocessing import Pool
 from user_agent import generate_user_agent
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
+​
 def file_len(fname):
     with open(fname) as f:
         for i, l in enumerate(f):
             pass
     return i + 1
-
+​
 def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
     """get image links with selenium
     
@@ -49,7 +49,7 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
     """
     number_of_scrolls = ceil(num_requested/700)
     # 700 is currently arbitrary. It is an attempt to limit the images loaded.
-
+​
     img_urls = set()
     driver = webdriver.Firefox()
     for i in range(len(supplemented_keywords)):
@@ -68,9 +68,9 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
             except Exception as e:
                 print(f"Process {main_keyword} reached the end of page")
                 break
-
+​
         thumbs = driver.find_elements_by_xpath('//a[@class="wXeWr islib nfEiy mM5pbd"]')
-
+​
         # print(f"Number of thumbnails on screen: {len(thumbs)}") # Optional
         
         for i, thumb in enumerate(thumbs[:num_requested]):
@@ -82,14 +82,14 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
                                 # so that the URL can be retrieved
             except e:
                 print("Error clicking one thumbnail")
-
+​
             url_elements = driver.find_elements_by_xpath('//img[@class="n3VNCb"]')
             for url_element in url_elements:
                 try:
                     url = url_element.get_attribute('src')
                 except e:
                     print("Error getting one url")
-
+​
                 if url.startswith('http') and not url.startswith('https://encrypted-tbn0.gstatic.com'):
                     img_urls.add(url)
                     
@@ -102,8 +102,8 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
         for url in img_urls:
             wf.write(url +'\n')
     print(f'Stored {len(img_urls)} links in {link_file_path}')
-
-
+​
+​
 def download_images(main_keyword):
     """download images whose links are in the link file
     
@@ -153,7 +153,7 @@ def download_images(main_keyword):
                 if count % 10 == 0:
                     #print(f'Process-{main_keyword} is sleeping')
                     time.sleep(5)
-
+​
             except urllib.error.URLError as e:
                 print('URLError')
                 logging.error(f'URLError while downloading image {link}reason:{e.reason}')
@@ -172,11 +172,11 @@ def download_images(main_keyword):
 def master_download(main_keyword, num_requested = 30, supplemented_keywords=[' ']):
     get_image_links(main_keyword, supplemented_keywords, num_requested)
     download_images(main_keyword)
-
-
+​
+​
 if __name__ == "__main__":
     main_keywords = ['neutral', 'angry', 'surprise', 'disgust', 'fear', 'happy', 'sad']
-
+​
     supplemented_keywords = ['facial expression',\
                 'human face',\
                 'face',\
@@ -201,22 +201,22 @@ if __name__ == "__main__":
                 'doctor face',\
                 'movie face'
                 ]
-
+​
     # test for chinese
     # main_keywords = ['高兴', '悲伤', '惊讶']
     # supplemented_keywords = ['人脸']
-
+​
     # test for japanese
     # main_keywords = ['喜びます', 'きょうがいする', '悲しみ']
     # supplemented_keywords = ['顔つき']
-
+​
     download_dir = './data/'
     link_files_dir = './data/link_files/'
     log_dir = './logs/'
     for d in [download_dir, link_files_dir, log_dir]:
         if not os.path.exists(d):
             os.makedirs(d)
-
+​
     ###################################
     # get image links and store in file
     ###################################
@@ -225,7 +225,7 @@ if __name__ == "__main__":
     #     link_file_path = link_files_dir + keyword
     #     get_image_links(keyword, supplemented_keywords, link_file_path)
     
-
+​
     # multiple processes
     p = Pool(3) # default number of process is the number of cores of your CPU, change it by yourself
     for keyword in main_keywords:
