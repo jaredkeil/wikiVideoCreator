@@ -7,8 +7,8 @@ from skimage.util import img_as_ubyte
 import time
 from datetime import datetime
 
-from wiki_scrape import parse_wiki
-from image_downloader import *
+import wikipedia
+from image_downloader import master_download
 
 
 # Default Parameters
@@ -21,10 +21,12 @@ VIDEO_SIZE = (1920, 1080)
 IMG_SHAPE = (1080, 1920)
 IMG_DISPLAY_DURATION = 5    #duration, in seconds, to display each image
 
-class WikiMovieMaker():
+class WikiMovie():
 
-    def __init__(self, main_keyword):
-        self.main_keyword = main_keyword
+    def __init__(self, page):
+        self.page = page
+        self.title = self.page.title
+        self.script = self.page.content
 
     def create_paths(self):
         # Directories
@@ -68,8 +70,9 @@ class WikiMovieMaker():
             imsave(save_path, img_as_ubyte(img_array))
 
     def make_movie(self, cutoff=None):
+        
+        print("Video Title: ", self.title)
 
-        self.title, self.script = parse_wiki(self.main_keyword)
         if cutoff:
             self.script = self.script[:cutoff]
 
@@ -115,5 +118,6 @@ class WikiMovieMaker():
         subscribe.close()
 
 if __name__ == "__main__":
-    WMM = WikiMovieMaker('Badger')
+    page = wikipedia.page('Badger')
+    WMM = WikiMovie(page)
     WMM.make_movie(cutoff=300)
