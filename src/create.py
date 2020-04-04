@@ -13,12 +13,12 @@ def get_top25():
     return top25
 
 def upload_to_youtube(movie):
-    keywords = '","'.join(movie.page.categories)
+#    keywords = '","'.join(movie.page.categories)
     arglist = ['python', 'upload_video.py',
             f'--file={movie.VID_PATH}',
             f'--title={movie.title}',
             f'--description={movie.page.summary}',
-            f'--keywords={keywords}',
+            f'--keywords=',
             '--category=27',
             '--privacyStatus=public']
     print(arglist)

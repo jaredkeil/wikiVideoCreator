@@ -117,7 +117,7 @@ class WikiMovie():
                                             on_color(color=BLACK, col_opacity=1)
         # Encode Video
         start = datetime.now()
-        self.video.write_videofile(self.VID_PATH, fps=0.5, codec='mpeg4', audio_codec="aac")
+        self.video.write_videofile(self.VID_PATH, fps=0.1, codec='mpeg4', audio_codec="aac")
         dur = datetime.now() - start
         print("Video Encoding completed in time: ", dur)
 
