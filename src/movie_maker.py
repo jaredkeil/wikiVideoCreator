@@ -46,6 +46,9 @@ class WikiMovie():
             if not os.path.exists(d):
                 os.makedirs(d)
                 print(d, "directory created")
+                
+    def parse(self):
+        self.script = self.script.replace("=","").split('\n\n\n See also')[0].split('\n\n\n Note')[0].split('\n\n\n References')[0]
 
     def text_to_audioclip(self):
         print("Converting text to speech. . . ")
@@ -84,7 +87,8 @@ class WikiMovie():
 
         if cutoff:
             self.script = self.script[:cutoff]
-
+            
+        self.parse()
         self.create_paths()
         # Create TTS (Text-to-Speech) audio
         self.text_to_audioclip()

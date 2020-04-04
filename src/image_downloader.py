@@ -78,7 +78,7 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
             sys.stdout.flush() 
             try:
                 thumb.click()
-                time.sleep(3.5) # This is wait time for the image to load in it's higher resolution 
+                time.sleep(1) # This is wait time for the image to load in it's higher resolution 
                                 # so that the URL can be retrieved
             except e:
                 print("Error clicking one thumbnail")
@@ -169,7 +169,7 @@ def download_images(main_keyword):
         downloaded_num = len(os.listdir(f"../images/{main_keyword}")) - 1 # 
         print(f"Successfully downloaded {downloaded_num} images")
                 
-def master_download(main_keyword, num_requested = 10, supplemented_keywords=[' ']):
+def master_download(main_keyword, num_requested = 20, supplemented_keywords=[' ']):
     get_image_links(main_keyword, supplemented_keywords, num_requested)
     download_images(main_keyword)
 
