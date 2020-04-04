@@ -9,6 +9,7 @@ from datetime import datetime
 
 import wikipedia
 from image_downloader import master_download
+from im_funcs import maxsize_pad
 
 
 # Default Parameters
@@ -48,7 +49,10 @@ class WikiMovie():
                 print(d, "directory created")
                 
     def parse(self):
-        self.script = self.script.replace("=","").split('\n\n\n See also')[0].split('\n\n\n Note')[0].split('\n\n\n References')[0]
+        self.script = self.script.replace("=","")./
+                        split('\n\n\n See also')[0]./
+                        split('\n\n\n Note')[0]./
+                        split('\n\n\n References')[0]
 
     def text_to_audioclip(self):
         print("Converting text to speech. . . ")
@@ -61,20 +65,23 @@ class WikiMovie():
 
     def resize_images(self):
         self.final_img_paths = []
-
-        fnames =  [f for f in os.listdir(self.IMG_DIR) if not (f.startswith('.') or f == 'resize')]
+        files = os.listdir(self.IMG_DIR)
+        fnames =  [f for f in files if not (f.startswith('.') or f == 'resize')]
         self.fixed_durations = [IMG_DISPLAY_DURATION for _ in fnames]
+        
+        n_imgs = len(fnames)
+        for i, fname in enumerate(fnames):
+            sys.stdout.write(f"Resizing Images [{'#' * (i+1) + ' ' * (n_imgs-i-1)}]   \r")
+            sys.stdout.flush() 
 
-        print("Resizing images. . .")
-        for fname in fnames:
             path = os.path.join(self.IMG_DIR, fname)
+            save_path = os.path.join(self.RESIZE_DIR, fname)
             try:
-                img_array = transform.resize(imread(path), output_shape=IMG_SHAPE, mode='constant')[:,:,:3]
+                maxsize_pad(path, save_path)
             except Exception:
                 continue
-            save_path = os.path.join(self.RESIZE_DIR, fname)
+
             self.final_img_paths.append(save_path)
-            imsave(save_path, img_as_ubyte(img_array))
 
     def make_movie(self, cutoff=None):
         """
@@ -121,7 +128,8 @@ class WikiMovie():
                                             on_color(color=BLACK, col_opacity=1)
         # Encode Video
         start = datetime.now()
-        self.video.write_videofile(self.VID_PATH, fps=0.5, codec='mpeg4', audio_codec="aac")
+        self.video.write_videofile(self.VID_PATH, fps=0.5, codec='mpeg4', 
+                                    audio_codec="aac", preset='ultrafast')
         dur = datetime.now() - start
         print("Video Encoding completed in time: ", dur)
 

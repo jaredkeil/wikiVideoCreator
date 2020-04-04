@@ -15,6 +15,8 @@ def get_top25():
 
 def upload_to_youtube(movie):
 #    keywords = '","'.join(movie.page.categories)
+    mtitle = movie.title.title()
+
     arglist = ['python', 'upload_video.py',
             f'--file={movie.VID_PATH}',
             f'--title={movie.title}',
@@ -24,6 +26,20 @@ def upload_to_youtube(movie):
             '--privacyStatus=public']
     print(arglist)
     subprocess.run(arglist)
+
+def delete_assets(movie):
+    # delete all in image/{movie.title}, including resize folder
+    # delete video, mp3, url_files/.txt
+    
+    shutil.rmtree(movie.IMG_DIR)
+
+    txt_path = '../url_files/' + movie.title + '.txt'
+    asset_paths = [movie.VID_PATH, movie.AUDIO_PATH, txt_path]
+    for p in asset_paths:
+        if os.path.exists(p):
+            os.remove(p)
+        else:
+            print(f"The file {p} does not exist or cannot be found")
 
 def main():
     page_list = get_top25()
@@ -37,7 +53,11 @@ def main():
             upload_to_youtube(WMM)
         except Exception:
             print("Upload Failed")
-
+        try:
+            delete_assets(WMM)
+        except Exception:
+            print("Deletion of assets failed")
+            
 
 if __name__ == '__main__':
     main()
