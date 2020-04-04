@@ -49,9 +49,9 @@ class WikiMovie():
                 print(d, "directory created")
                 
     def parse(self):
-        self.script = self.script.replace("=","")./
-                        split('\n\n\n See also')[0]./
-                        split('\n\n\n Note')[0]./
+        self.script = self.script.replace("=","").\
+                        split('\n\n\n See also')[0].\
+                        split('\n\n\n Note')[0].\
                         split('\n\n\n References')[0]
 
     def text_to_audioclip(self):

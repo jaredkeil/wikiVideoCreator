@@ -1,3 +1,5 @@
+import os
+import shutil
 import subprocess
 import pandas as pd
 import wikipedia
@@ -57,7 +59,7 @@ def main():
             delete_assets(WMM)
         except Exception:
             print("Deletion of assets failed")
-            
+
 
 if __name__ == '__main__':
     main()
