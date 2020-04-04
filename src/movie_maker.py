@@ -22,7 +22,11 @@ IMG_SHAPE = (1080, 1920)
 IMG_DISPLAY_DURATION = 5    #duration, in seconds, to display each image
 
 class WikiMovie():
-
+    """
+    Make movies in standard format (.mp4) from wikipedia pages.
+    Initialize with 'page' object from wikipedia Python module.
+    Primary user function is make_movie().
+    """
     def __init__(self, page):
         self.page = page
         self.title = self.page.title
@@ -70,7 +74,12 @@ class WikiMovie():
             imsave(save_path, img_as_ubyte(img_array))
 
     def make_movie(self, cutoff=None):
-        
+        """
+        Args:
+            cutoff (int): Limit the length of the script. Used like script[:cutoff]
+        Returns:
+            None
+        """
         print("Video Title: ", self.title)
 
         if cutoff:
