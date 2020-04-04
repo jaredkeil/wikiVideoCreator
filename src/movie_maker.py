@@ -30,10 +30,10 @@ class WikiMovie():
 
     def create_paths(self):
         # Directories
-        self.IMG_DIR = './images/' + self.title + "/"
-        self.RESIZE_DIR = self.IMG_DIR + "/resize"
-        self.AUDIO_DIR = './audio/'
-        self.VID_DIR = './videos/'
+        self.IMG_DIR = '../images/' + self.title + "/"
+        self.RESIZE_DIR = self.IMG_DIR + "resize/"
+        self.AUDIO_DIR = '../audio/'
+        self.VID_DIR = '../videos/'
         # Paths
         self.AUDIO_PATH = self.AUDIO_DIR + self.title + ".mp3"
         self.VID_PATH = self.VID_DIR+ self.title + ".mp4"
@@ -80,7 +80,7 @@ class WikiMovie():
         # Create TTS (Text-to-Speech) audio
         self.text_to_audioclip()
         # Download and resize images
-#         master_download(self.main_keyword)
+        master_download(self.title)
         self.resize_images()
 
         # Create Video Clips

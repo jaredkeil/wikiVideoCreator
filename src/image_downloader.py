@@ -96,7 +96,7 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
     driver.quit()
     
     # Defining link file path
-    link_file_path=f"url_files/{main_keyword}.txt"
+    link_file_path=f"../url_files/{main_keyword}.txt"
     
     with open(link_file_path, 'w') as wf:
         for url in img_urls:
@@ -114,7 +114,7 @@ def download_images(main_keyword):
     Returns:
         None
     """
-    link_file_path=f"url_files/{main_keyword}.txt"
+    link_file_path=f"../url_files/{main_keyword}.txt"
     print('Start downloading with link file {0}..........'.format(link_file_path))
     log_dir='log_dir/'
     if not os.path.exists(log_dir):
@@ -122,8 +122,8 @@ def download_images(main_keyword):
     log_file = log_dir + 'download_selenium_{0}.log'.format(main_keyword)
     logging.basicConfig(level=logging.DEBUG, filename=log_file, filemode="a+", 
                         format="%(asctime)-15s %(levelname)-8s  %(message)s")
-    download_dir='images'
-    img_dir = download_dir + '/' + main_keyword + '/'
+    download_dir='../images/'
+    img_dir = download_dir + main_keyword + '/'
     count = 0
     headers = {}
     if not os.path.exists(img_dir):
@@ -166,7 +166,7 @@ def download_images(main_keyword):
                 print('Unexpected Error')
                 logging.error(f'Unexpeted error while downloading image {link}error type:{e.args}')
                 continue
-        downloaded_num = len(os.listdir(f"images/{main_keyword}"))
+        downloaded_num = len(os.listdir(f"../images/{main_keyword}"))
         print(f"Successfully downloaded {downloaded_num} images")
                 
 def master_download(main_keyword, num_requested = 30, supplemented_keywords=[' ']):
