@@ -19,7 +19,7 @@ BLACK_GIZEH = (0, 0, 0)
 
 VIDEO_SIZE = (1920, 1080)
 IMG_SHAPE = (1080, 1920)
-IMG_DISPLAY_DURATION = 5    #duration, in seconds, to display each image
+IMG_DISPLAY_DURATION = 4    #duration, in seconds, to display each image
 
 class WikiMovie():
     """
@@ -67,7 +67,7 @@ class WikiMovie():
             path = os.path.join(self.IMG_DIR, fname)
             try:
                 img_array = transform.resize(imread(path), output_shape=IMG_SHAPE, mode='constant')[:,:,:3]
-            except ValueError:
+            except Exception:
                 continue
             save_path = os.path.join(self.RESIZE_DIR, fname)
             self.final_img_paths.append(save_path)
@@ -117,7 +117,7 @@ class WikiMovie():
                                             on_color(color=BLACK, col_opacity=1)
         # Encode Video
         start = datetime.now()
-        self.video.write_videofile(self.VID_PATH, fps=0.1, codec='mpeg4', audio_codec="aac")
+        self.video.write_videofile(self.VID_PATH, fps=0.5, codec='mpeg4', audio_codec="aac")
         dur = datetime.now() - start
         print("Video Encoding completed in time: ", dur)
 
@@ -127,6 +127,6 @@ class WikiMovie():
         subscribe.close()
 
 if __name__ == "__main__":
-    page = wikipedia.page('Badger')
+    page = wikipedia.page(input("What would you like the video to be about? "))
     WMM = WikiMovie(page)
     WMM.make_movie(cutoff=300)

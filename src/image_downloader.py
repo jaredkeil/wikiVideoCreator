@@ -166,10 +166,10 @@ def download_images(main_keyword):
                 print('Unexpected Error')
                 logging.error(f'Unexpeted error while downloading image {link}error type:{e.args}')
                 continue
-        downloaded_num = len(os.listdir(f"../images/{main_keyword}"))
+        downloaded_num = len(os.listdir(f"../images/{main_keyword}")) - 1 # 
         print(f"Successfully downloaded {downloaded_num} images")
                 
-def master_download(main_keyword, num_requested = 30, supplemented_keywords=[' ']):
+def master_download(main_keyword, num_requested = 10, supplemented_keywords=[' ']):
     get_image_links(main_keyword, supplemented_keywords, num_requested)
     download_images(main_keyword)
 

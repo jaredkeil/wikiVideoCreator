@@ -4,12 +4,13 @@ import wikipedia
 
 from movie_maker import WikiMovie
 
+n_pages = 10 # Number of pages to make videos of from the wikipedia list.
 
 def get_top25():
     url = "https://en.wikipedia.org/wiki/Wikipedia:Top_25_Report"
     table = pd.read_html(url)[2]
     print("Extracting wikipedia pages")
-    top25 = list(map(lambda x: wikipedia.page(x), table["Article"][:1]))
+    top25 = list(map(lambda x: wikipedia.page(x), table["Article"][5:n_pages]))
     return top25
 
 def upload_to_youtube(movie):
@@ -26,9 +27,12 @@ def upload_to_youtube(movie):
 
 def main():
     page_list = get_top25()
-    for page in page_list[:1]:
+    for page in page_list[5:n_pages]:
         WMM = WikiMovie(page)
-        WMM.make_movie(cutoff=300)
+        try: 
+            WMM.make_movie(cutoff=600)
+        except Exception:
+            print("Movie creation failed")
         try:
             upload_to_youtube(WMM)
         except Exception:
