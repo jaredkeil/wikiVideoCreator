@@ -72,7 +72,8 @@ class WikiMovie():
         n_imgs = len(fnames)
         for i, fname in enumerate(fnames):
             sys.stdout.write(f"Resizing Images [{'#' * (i+1) + ' ' * (n_imgs-i-1)}]   \r")
-            sys.stdout.flush() 
+            sys.stdout.flush()
+            
 
             path = os.path.join(self.IMG_DIR, fname)
             save_path = os.path.join(self.RESIZE_DIR, fname)
@@ -102,6 +103,7 @@ class WikiMovie():
         # Download and resize images
         master_download(self.title)
         self.resize_images()
+        print('\n') 
 
         # Create Video Clips
         print("Creating clips. . .")

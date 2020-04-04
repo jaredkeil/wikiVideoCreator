@@ -55,10 +55,8 @@ def main():
             upload_to_youtube(WMM)
         except Exception:
             print("Upload Failed")
-        try:
-            delete_assets(WMM)
-        except Exception:
-            print("Deletion of assets failed")
+        delete_assets(WMM)
+
 
 
 if __name__ == '__main__':

@@ -101,7 +101,7 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
     with open(link_file_path, 'w') as wf:
         for url in img_urls:
             wf.write(url +'\n')
-    print(f'Stored {len(img_urls)} links in {link_file_path}')
+    print(f'\nStored {len(img_urls)} links in {link_file_path}')
 
 
 def download_images(main_keyword):
@@ -167,7 +167,7 @@ def download_images(main_keyword):
                 logging.error(f'Unexpeted error while downloading image {link}error type:{e.args}')
                 continue
         downloaded_num = len(os.listdir(f"../images/{main_keyword}")) - 1 # 
-        print(f"Successfully downloaded {downloaded_num} images")
+        print(f"\nSuccessfully downloaded {downloaded_num} images")
                 
 def master_download(main_keyword, num_requested = 20, supplemented_keywords=[' ']):
     get_image_links(main_keyword, supplemented_keywords, num_requested)
