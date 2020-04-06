@@ -96,15 +96,17 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
     driver.quit()
     
     # Defining link file path
-    link_file_path=f"../url_files/{main_keyword}.txt"
+    p = Path(__file__).resolve().parents[1]
+    link_file_path = p / 'url_files' / f"{main_keyword}.txt"
     
     with open(link_file_path, 'w') as wf:
         for url in img_urls:
             wf.write(url +'\n')
     print(f'\nStored {len(img_urls)} links in {link_file_path}')
+    return link_file_path
 
 
-def download_images(main_keyword):
+def download_images(link_file_path):
     """download images whose links are in the link file
     
     Args:
@@ -170,8 +172,8 @@ def download_images(main_keyword):
         print(f"\nSuccessfully downloaded {downloaded_num} images")
                 
 def master_download(main_keyword, num_requested = 20, supplemented_keywords=[' ']):
-    get_image_links(main_keyword, supplemented_keywords, num_requested)
-    download_images(main_keyword)
+    link_file_path = get_image_links(main_keyword, supplemented_keywords, num_requested)
+    download_images(link_file_path)
 
 
 if __name__ == "__main__":
