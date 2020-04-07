@@ -1,5 +1,14 @@
+# Ignore model
+dc_tts/LJ_logdir/
+
+# Ignore media files
+*.wav
+*.mp3
+*.mp4
+
 # Ignoring Images Directory
 *.jpg
+*.png
 
 #Ignore virtual Environment
 youtube_upload/
