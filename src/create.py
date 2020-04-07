@@ -10,7 +10,8 @@ import wikipediaapi
 from movie_maker import WikiMovie
 
 
-WikiAPI = wikipediaapi.Wikipedia('en') # initialize API
+# initialize API
+WikiAPI = wikipediaapi.Wikipedia('en')
 
 def custom_list(url):
     table = pd.read_html(url)[2]
