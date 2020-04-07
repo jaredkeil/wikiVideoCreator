@@ -15,6 +15,7 @@
 ####################################################################################################################
 
 import os
+from pathlib import Path
 import sys
 import json
 import time
@@ -35,17 +36,18 @@ def file_len(fname):
             pass
     return i + 1
 
-def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
+def get_image_links(main_keyword, url_dir, supplemented_keywords, num_requested = 100):
     """get image links with selenium
     
     Args:
         main_keyword (str): main keyword
+        url_dir (Path): 
         supplemented_keywords (list[str]): list of supplemented keywords
         link_file_path (str): path of the file to store the links
         num_requested (int, optional): maximum number of images to download
     
     Returns:
-        None
+        link_file_path (Path): 
     """
     number_of_scrolls = ceil(num_requested/700)
     # 700 is currently arbitrary. It is an attempt to limit the images loaded.
@@ -94,46 +96,54 @@ def get_image_links(main_keyword, supplemented_keywords, num_requested = 100):
                     img_urls.add(url)
                     
     driver.quit()
-    
-    # Defining link file path
-    p = Path(__file__).resolve().parents[1]
-    link_file_path = p / 'url_files' / f"{main_keyword}.txt"
-    
-    with open(link_file_path, 'w') as wf:
+
+    # Defining link file path    
+    fname = f"{main_keyword}.txt"
+    link_file_path = url_dir / fname
+    if not link_file_path.exists():
+        link_file_path.touch(mode=0o777)
+        print(f"Made file {link_file_path}")
+    # Storing url links in file
+    with link_file_path.open('w') as wf:
         for url in img_urls:
+            print(url)
             wf.write(url +'\n')
+
     print(f'\nStored {len(img_urls)} links in {link_file_path}')
     return link_file_path
 
 
-def download_images(link_file_path):
+def download_images(main_keyword, link_file_path, img_dir):
     """download images whose links are in the link file
     
     Args:
-        link_file_path (str): path of file containing links of images
-        download_dir (str): directory to store the downloaded images
+        main_keyword (str): main keyword used previously by get_image_links
+        link_file_path (Path): path of .txt file which contains image URLs
+        img_dir (Path): directory to store the downloaded images
     
     Returns:
         None
     """
-    link_file_path=f"../url_files/{main_keyword}.txt"
+    # link_file_path=f"../url_files/{main_keyword}.txt"
     print('Start downloading with link file {0}..........'.format(link_file_path))
+    
     log_dir='log_dir/'
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     log_file = log_dir + 'download_selenium_{0}.log'.format(main_keyword)
     logging.basicConfig(level=logging.DEBUG, filename=log_file, filemode="a+", 
                         format="%(asctime)-15s %(levelname)-8s  %(message)s")
-    download_dir='../images/'
-    img_dir = download_dir + main_keyword + '/'
+    p = Path(__file__).resolve().parents[1]
+    img_dir = p / 'images' / main_keyword
     count = 0
     headers = {}
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
         
     # start to download images
-    with open(link_file_path, 'r') as rf:
-        for i, link in enumerate(rf):
+    with link_file_path.open('r') as rf:
+        for i, link in enumerate(rf.readlines()):
+            print(link)
             sys.stdout.write(f"Downloading images [{'#' * (i+1) + ' ' * (file_len(link_file_path) - i)}]   \r")
             sys.stdout.flush() 
             try:
@@ -147,8 +157,8 @@ def download_images(link_file_path):
                 req = urllib.request.Request(link.strip(), headers = headers)
                 response = urllib.request.urlopen(req)
                 data = response.read()
-                file_path = img_dir + f'{count}.jpg'
-                with open(file_path,'wb') as wf:
+                file_path = img_dir / f'{count}.jpg'
+                with file_path.open('wb') as wf:
                     wf.write(data)
                 # print(f'Process-{main_keyword} download image {main_keyword}/{count}.jpg')
                 count += 1
@@ -168,12 +178,22 @@ def download_images(link_file_path):
                 print('Unexpected Error')
                 logging.error(f'Unexpeted error while downloading image {link}error type:{e.args}')
                 continue
-        downloaded_num = len(os.listdir(f"../images/{main_keyword}")) - 1 # 
+        downloaded_num = os.stat(img_dir).st_nlink - 1 # 
         print(f"\nSuccessfully downloaded {downloaded_num} images")
                 
-def master_download(main_keyword, num_requested = 20, supplemented_keywords=[' ']):
-    link_file_path = get_image_links(main_keyword, supplemented_keywords, num_requested)
-    download_images(link_file_path)
+def master_download(main_keyword, url_dir, img_dir, num_requested = 20, supplemented_keywords=[' ']):
+    """
+    Retrieve image URLs and download, in two step process.
+
+    Args:
+        main_keyword (str): Keyword to search google with
+        url_dir: directory to store the generated .txt file containing list of image URLs
+        img_dir: directory to store the downloaded images
+    Returns:
+        None
+    """
+    link_file_path = get_image_links(main_keyword, url_dir, supplemented_keywords, num_requested)
+    download_images(main_keyword, link_file_path, img_dir)
 
 
 if __name__ == "__main__":
