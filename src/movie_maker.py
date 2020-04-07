@@ -24,6 +24,10 @@ VIDEO_SIZE = (1920, 1080)
 IMG_SHAPE = (1080, 1920)
 IMG_DISPLAY_DURATION = 4    #duration, in seconds, to display each image
 
+exclude_set = {'See also', 'References', 'Further reading', 'External links',
+                'Formats and track listings', 'Credits and personnel', 'Charts',
+                'Certifications', 'Release history'}
+
 class WikiMovie():
     """
     Make movies in standard format (.mp4) from wikipedia pages.
@@ -40,19 +44,24 @@ class WikiMovie():
 
     def _create_paths(self):
         # Directories
-        self.url_dir = self.p / 'url_files'
+        self.parent_images = self.p / 'images'
         self.imgdir = self.p / 'images' / self.title
         self.resizedir = self.imgdir / 'resize'
+        self.parent_audio = self.p / 'audio'
         self.auddir = self.p / 'audio' / self.title
+        self.url_dir = self.p / 'url_files'
         self.viddir = self.p / 'videos'
-        # Paths
+        # Path
         self.vidpath = self.viddir / (self.title + ".mp4")
 
-        for d in [self.url_dir, self.imgdir, self.resizedir, self.auddir, self.viddir]:
+        print('creating paths...')
+        for d in [self.parent_images, self.imgdir, self.resizedir,\
+                self.parent_audio, self.auddir, self.url_dir, self.viddir]:
             if not d.exists():
                 d.mkdir()
                 print(d, "directory created")
-    
+            elif d.exists():
+                print(d, "exists")
 
     def _resize_images(self):
         self._imgpaths = []
@@ -65,13 +74,15 @@ class WikiMovie():
             sys.stdout.write(f"Resizing Images [{'#' * (i+1) + ' ' * (n_imgs-i-1)}]   \r")
             sys.stdout.flush()
             
-            path = os.path.join(self.imgdir, fname)
-            save_path = os.path.join(self.resizedir, fname)
+            path = str(self.imgdir / fname)
+            print(path)
+            save_path = str(self.resizedir / fname)
+            print(self.resizedir)
+            print(save_path)
             try:
                 maxsize_pad(path, save_path)
             except Exception:
                 continue
-
             self._imgpaths.append(save_path)
 
 
@@ -120,7 +131,7 @@ class WikiMovie():
     def _flush_sections(self, sections, level=0):
         """Recursively get text from all levels in sections,
         and generate narrations"""
-        exclude_set = {'See also', 'References', 'Further reading', 'External links'}
+
         for s in sections:
             if s.title in exclude_set:
                 continue
@@ -158,7 +169,8 @@ class WikiMovie():
         self._create_paths()
 
         # Download and resize images
-        master_download(main_keyword=self.title, url_dir=self.url_dir , img_dir=self.imgdir)
+        master_download(main_keyword=self.title, url_dir=self.url_dir,
+                        img_dir=self.imgdir, num_requested=100)
         self._resize_images()
         print('\n') 
 
@@ -195,4 +207,4 @@ if __name__ == "__main__":
     wiki = wikipediaapi.Wikipedia('en')
     page = wiki.page(input("What would you like the video to be about? "))
     WMM = WikiMovie(page)
-    WMM.make_movie(cutoff=20)
+    WMM.make_movie(cutoff=None)

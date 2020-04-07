@@ -76,7 +76,7 @@ def get_image_links(main_keyword, url_dir, supplemented_keywords, num_requested 
         # print(f"Number of thumbnails on screen: {len(thumbs)}") # Optional
         
         for i, thumb in enumerate(thumbs[:num_requested]):
-            sys.stdout.write(f"Finding URL's [{'#' * (i+1) + ' ' * (num_requested - i)}]   \r")
+            sys.stdout.write(f"Finding URL's [{'#' * (i+1) + ' ' * (num_requested - i -1)}]   \r")
             sys.stdout.flush() 
             try:
                 thumb.click()
@@ -144,7 +144,7 @@ def download_images(main_keyword, link_file_path, img_dir):
     with link_file_path.open('r') as rf:
         for i, link in enumerate(rf.readlines()):
             print(link)
-            sys.stdout.write(f"Downloading images [{'#' * (i+1) + ' ' * (file_len(link_file_path) - i)}]   \r")
+            sys.stdout.write(f"Downloading images [{'#' * (i+1) + ' ' * (file_len(link_file_path) - i -1)}]   \r")
             sys.stdout.flush() 
             try:
                 o = urlparse(link)
@@ -178,7 +178,7 @@ def download_images(main_keyword, link_file_path, img_dir):
                 print('Unexpected Error')
                 logging.error(f'Unexpeted error while downloading image {link}error type:{e.args}')
                 continue
-        downloaded_num = os.stat(img_dir).st_nlink - 1 # 
+        downloaded_num = os.stat(img_dir).st_nlink 
         print(f"\nSuccessfully downloaded {downloaded_num} images")
                 
 def master_download(main_keyword, url_dir, img_dir, num_requested = 20, supplemented_keywords=[' ']):
