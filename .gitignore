@@ -1,5 +1,6 @@
 # Ignore model
-dc_tts/LJ_logdir/
+LJ_logdir/
+*model_gs_724k.data-00000-of-00001
 
 # Ignore media files
 *.wav

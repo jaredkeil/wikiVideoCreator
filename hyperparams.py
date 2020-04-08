@@ -42,6 +42,6 @@ class Hyperparams:
     # training scheme
     lr = 0.001 # Initial learning rate.
     logdir = "LJ_logdir/LJ01"
-    sampledir = 'samples'
+    sampledir = 'dc_tts/samples/harvard_sentences'
     B = 32 # batch size
     num_iterations = 2000000

@@ -24,7 +24,7 @@ VIDEO_SIZE = (1920, 1080)
 IMG_SHAPE = (1080, 1920)
 IMG_DISPLAY_DURATION = 4    #duration, in seconds, to display each image
 
-exclude_set = {'See also', 'References', 'Further reading', 'External links',
+excluded_sections = {'See also', 'References', 'Further reading', 'External links',
                 'Formats and track listings', 'Credits and personnel', 'Charts',
                 'Certifications', 'Release history'}
 
@@ -34,24 +34,31 @@ class WikiMovie():
     Initialize with 'page' object from wikipedia Python module.
     Primary user function is make_movie().
     """
-    def __init__(self, page):
+    def __init__(self, page, narrator='gtts'):
         self.page = page
         self.title = self.page._attributes['title']
+        self.narrator = narrator
         self.cliplist = []
         self.p = Path(__file__).resolve().parents[1]
         self._imgidx = 0
         
 
     def _create_paths(self):
-        # Directories
+        # Image directories
         self.parent_images = self.p / 'images'
         self.imgdir = self.p / 'images' / self.title
         self.resizedir = self.imgdir / 'resize'
+        # gTTS audio directories
         self.parent_audio = self.p / 'audio'
         self.auddir = self.p / 'audio' / self.title
+        # dc_tts output directory
+        self.dctts_dir = self.p / 'dc_tts'
+        self.dctts_out = self.dctts_dir / 'samples' 
+        # URL lists text files directory
         self.url_dir = self.p / 'url_files'
+        # Video directory (all article videos stored in folder, files named by title)
         self.viddir = self.p / 'videos'
-        # Path
+        # Video save path
         self.vidpath = self.viddir / (self.title + ".mp4")
 
         print('creating paths...')
@@ -133,11 +140,12 @@ class WikiMovie():
         and generate narrations"""
 
         for s in sections:
-            if s.title in exclude_set:
+            if s.title in excluded_sections:
                 continue
             else:
                 self._add_subsection(s, level) # clip creation
-                self._flush_sections(s.sections, level+1) # recursion
+                # recursion to next level. Once lowest level is reached, next main section will be accessed
+                self._flush_sections(s.sections, level+1) 
 
 
     def _flush_page(self):
