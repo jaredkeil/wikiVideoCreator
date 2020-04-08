@@ -37,7 +37,7 @@ class WikiMovie():
     def __init__(self, page, narrator='gtts'):
         self.page = page
         self.title = self.page._attributes['title']
-        self.narrator = narrator
+        # self.narrator = narrator
         self.cliplist = []
         self.p = Path(__file__).resolve().parents[1]
         self._imgidx = 0
