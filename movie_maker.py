@@ -1,18 +1,18 @@
 from pathlib import Path
 import os
+import wikipediaapi
 from moviepy.editor import *
 import gizeh as gz
 from gtts import gTTS
-from skimage.io import imread, imsave
-from skimage import transform
-from skimage.util import img_as_ubyte
+from pydub import AudioSegment
+
 import time
 from datetime import datetime
 
-import wikipediaapi
 from image_downloader import master_download
 from im_funcs import maxsize_pad
-
+from synthesize import synthesize as dctts_synthesize
+from hyperparams import Hyperparams as hp
 
 # Default Parameters
 WHITE = (255, 255, 255)
