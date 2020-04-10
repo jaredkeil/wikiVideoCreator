@@ -96,7 +96,7 @@ class WikiMovie():
             print(f'made directory {resizedir}')
         
         for i, fname in enumerate(fnames, start=1):
-            sys.stdout.write(f"Resizing Images [{'#'*(i) + ' '*(n_imgs - si)}]   \r")
+            sys.stdout.write(f"Resizing Images [{'#'*(i) + ' '*(n_imgs - i)}]   \r")
             sys.stdout.flush()
             
             path = str(sk_imgdir / fname)
@@ -123,6 +123,8 @@ class WikiMovie():
                         
     
     def make_narration(self):
+        if self.overwrite == False:
+            return None
         if self.narrator == 'dctts':
             #check if narration already exists
             if len(os.listdir(self.dctts_out)) > 0 and self.overwrite == False:
@@ -221,33 +223,32 @@ class WikiMovie():
             ct += n
              
                              
-    def create_clip(self, section):
+    def create_clip(self, sd):
         """
         Load back audio and attach it to proper clip
         Args: 
-            section (dict): A dictionary as found in self.script
+            sd (dict): A dictionary as found in self.script
         Returns:
             V (VideoClip): Combined TextClip and (optional) ImageSequence
         """
-        prefix = str(self.auddir / section['title'])
+        prefix = str(self.auddir / sd['title'])
         ACH = AudioFileClip(prefix + '_header.mp3')
                   
-        fontsize = 130 - (30 * section['level']) # higher level means deeper 'indentation'
-        V = TextClip(section['title'], color='white', fontsize=fontsize, 
+        fontsize = 130 - (30 * sd['level']) # higher level means deeper 'indentation'
+        V = TextClip(sd['title'], color='white', fontsize=fontsize, 
                     size=VIDEO_SIZE, method='caption').\
                     set_audio(ACH).set_duration(ACH.duration)
                              
-        if section['text']:
+        if sd['title'] in self.keywords:
             ACT = AudioFileClip(prefix + '_text.mp3')
                              
-            # self._imgidx += 1             
-            IS = ImageSequenceClip(sequence=section['imgpaths'],
-                                durations=section['idd'], load_images=True).\
+            IS = ImageSequenceClip(sequence=sd['imgpaths'],
+                                durations=sd['idd'], load_images=True).\
                             set_position(('center', 400)).\
                             fx(vfx.loop, duration=ACT.duration).\
                             set_audio(ACT)
             V = concatenate_videoclips([V, IS])
-    
+        print(sd['title'], 'clip created!')
         return V
 
                              
@@ -269,16 +270,16 @@ class WikiMovie():
         hp.sampledir = str(WMM.dctts_out) 
         # Download and resize images
         self.get_keywords()
-        master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
-                        url_dir=self.url_dir, img_dir=self.imgdir, num_requested=20)
-        self.resize_images()
+        # master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
+        #                 url_dir=self.url_dir, img_dir=self.imgdir, num_requested=20)
+        self.process_images()
         print('\n') 
         
-        self.make_narration()                
+        self.make_narration()
+        print('creating audio')               
         # Create Video Clips
         print("Creating clips. . .")
-        for sd in self.script:
-            self.create_clip(sd)
+        self.cliplist = [self.create_clip(sd) for sd in self.script]
 
                              
         thanks = TextClip("Thanks for watching \n and listening",
@@ -309,5 +310,5 @@ class WikiMovie():
 if __name__ == "__main__":
     wiki = wikipediaapi.Wikipedia('en')
     page = wiki.page(input("What would you like the video to be about? "))
-    WMM = WikiMovie(page, narrator='gtts')
+    WMM = WikiMovie(page, narrator='gtts', overwrite=False)
     WMM.make_movie(cutoff=None, hp=hp)
