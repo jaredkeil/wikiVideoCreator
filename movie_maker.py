@@ -83,10 +83,10 @@ class WikiMovie():
                 print(d, "exists")
 
     def resize_images(self, sd):
-        sd['imgpaths'] = [] #image paths
+        
         sk_imgdir = self.imgdir / sd['title'] # supplemented keyword used earlier by image search/download
         contents = sk_imgdir.glob('*') 
-        fnames =  [x for x in contents if x.is_file() and x.parts[-1][0] != '.']
+        fnames =  [x.parts[-1] for x in contents if x.is_file() and x.parts[-1][0] != '.']
         n_imgs = len(fnames)
         sd['idd'] = [IMG_DISPLAY_DURATION for _ in fnames]
         
@@ -95,25 +95,26 @@ class WikiMovie():
             resizedir.mkdir()
             print(f'made directory {resizedir}')
         
+        sd['imgpaths'] = [] #image paths
         for i, fname in enumerate(fnames, start=1):
             sys.stdout.write(f"Resizing Images [{'#'*(i) + ' '*(n_imgs - i)}]   \r")
             sys.stdout.flush()
             
             path = str(sk_imgdir / fname)
-            print(path)
+            # print('original path:', path)
             save_path = str(resizedir / fname)
-            print(resizedir)
-            print(save_path)
+            print('save path:', save_path)
             try:
                 maxsize_pad(path, save_path)
             except Exception:
+                print(f'error saving resized image: {fname}')
                 continue
             sd['imgpaths'].append(save_path)
 
                              
     def process_images(self):
         for sd in self.script:
-            if sd['title'] in self.keywords:
+            if sd['title'] in self.keywords or sd['level'] == 0:
                 self.resize_images(sd)
     
 
@@ -232,16 +233,17 @@ class WikiMovie():
             V (VideoClip): Combined TextClip and (optional) ImageSequence
         """
         prefix = str(self.auddir / sd['title'])
-        ACH = AudioFileClip(prefix + '_header.mp3')
+        ACH = AudioFileClip(prefix + '_header.mp3').set_fps(1)
                   
         fontsize = 130 - (30 * sd['level']) # higher level means deeper 'indentation'
         V = TextClip(sd['title'], color='white', fontsize=fontsize, 
                     size=VIDEO_SIZE, method='caption').\
                     set_audio(ACH).set_duration(ACH.duration)
                              
-        if sd['title'] in self.keywords:
-            ACT = AudioFileClip(prefix + '_text.mp3')
-                             
+        if sd['title'] in self.keywords or sd['level'] == 0:
+            ACT = AudioFileClip(prefix + '_text.mp3').set_fps(1)
+            print(sd['imgpaths'])   
+            print(sd['idd'])              
             IS = ImageSequenceClip(sequence=sd['imgpaths'],
                                 durations=sd['idd'], load_images=True).\
                             set_position(('center', 400)).\
@@ -249,6 +251,7 @@ class WikiMovie():
                             set_audio(ACT)
             V = concatenate_videoclips([V, IS])
         print(sd['title'], 'clip created!')
+        V = V.set_fps(1)
         return V
 
                              
@@ -279,22 +282,23 @@ class WikiMovie():
         print('creating audio')               
         # Create Video Clips
         print("Creating clips. . .")
-        self.cliplist = [self.create_clip(sd) for sd in self.script]
-
+        self.cliplist = [self.create_clip(sd) for sd in self.script[:1]]
                              
         thanks = TextClip("Thanks for watching \n and listening",
                             color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
-                            set_duration(2)
+                            set_duration(2).set_fps(1)
 
         subscribe = TextClip("Please Subscribe!",
                                 color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
-                                set_duration(2)
+                                set_duration(2).set_fps(1)
 
         self.video = concatenate_videoclips(self.cliplist + [thanks, subscribe],
                                             method='compose').\
-                                            on_color(color=BLACK, col_opacity=1)
+                                            on_color(color=BLACK, col_opacity=1).\
+                                            set_fps(1)
         # Encode Video
         start = datetime.now()
+        # self.video.preview()
         self.video.write_videofile(str(self.vidpath) , fps=1, codec='mpeg4', 
                                    audio_codec="aac", preset='ultrafast')
         dur = datetime.now() - start
