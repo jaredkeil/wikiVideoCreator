@@ -28,6 +28,9 @@ excluded_sections = {'See also', 'References', 'Further reading', 'External link
                 'Formats and track listings', 'Credits and personnel', 'Charts',
                 'Certifications', 'Release history'}
 
+stops = {'\n', '\t', 'e.g.', '[sic]', '[...]', 'i.e.',}
+
+
 class WikiMovie():
     """
     Make movies in standard format (.mp4) from wikipedia pages.
@@ -37,23 +40,33 @@ class WikiMovie():
     def __init__(self, page, narrator='gtts'):
         self.page = page
         self.title = self.page._attributes['title']
-        # self.narrator = narrator
+        self.narrator = narrator
+        if self.narrator == 'dc_tts': self.sff = '.wav' # sound file format
+        else: self.sff = '.mp3'
+        self.script = [{'title': page.title, 
+                        'level': 0, 
+                        'text': self.clean_text(page.summary)}]
+        self.keywords = ['']
         self.cliplist = []
+        
         self.p = Path(__file__).resolve().parents[1]
-        self._imgidx = 0
+        # self.p = Path(os.path.abspath('')).resolve() ## For jupyter notebook
+        self._imgidx = 0 # For starting image seqeunces on unique image
+        self.cutoff = None
         
 
-    def _create_paths(self):
+    def create_paths(self):
         # Image directories
         self.parent_images = self.p / 'images'
-        self.imgdir = self.p / 'images' / self.title
-        self.resizedir = self.imgdir / 'resize'
+        self.imgdir = self.p / 'images'/ self.title
+#         self.resizedir = self.imgdir / 'resize'
         # gTTS audio directories
         self.parent_audio = self.p / 'audio'
         self.auddir = self.p / 'audio' / self.title
-        # dc_tts output directory
-        self.dctts_dir = self.p / 'dc_tts'
-        self.dctts_out = self.dctts_dir / 'samples' 
+        # dc_tts directory
+        self.dctts_dir = self.p / 'dctts'
+        self.dctts_in = self.dctts_dir / 'text_input'
+        self.dctts_out = self.dctts_dir / 'samples' / self.title
         # URL lists text files directory
         self.url_dir = self.p / 'url_files'
         # Video directory (all article videos stored in folder, files named by title)
@@ -62,109 +75,182 @@ class WikiMovie():
         self.vidpath = self.viddir / (self.title + ".mp4")
 
         print('creating paths...')
-        for d in [self.parent_images, self.imgdir, self.resizedir,\
-                self.parent_audio, self.auddir, self.url_dir, self.viddir]:
+        for d in [self.imgdir, self.parent_audio, self.auddir, self.dctts_dir,\
+                self.dctts_in, self.dctts_out, self.url_dir, self.viddir]:
             if not d.exists():
                 d.mkdir()
                 print(d, "directory created")
             elif d.exists():
                 print(d, "exists")
 
-    def _resize_images(self):
-        self._imgpaths = []
-        contents = self.imgdir.glob('*')
+    def resize_images(self, sd):
+        sd['imgpaths'] = [] #image paths
+        sk_imgdir = self.imgdir / sd['title'] # supplemented keyword used earlier by image search/download
+        contents = sk_imgdir.glob('*') 
         fnames =  [x for x in contents if x.is_file() and x.parts[-1][0] != '.']
-        self.fixed_durations = [IMG_DISPLAY_DURATION for _ in fnames]
-        
         n_imgs = len(fnames)
-        for i, fname in enumerate(fnames):
-            sys.stdout.write(f"Resizing Images [{'#' * (i+1) + ' ' * (n_imgs-i-1)}]   \r")
+        sd['idd'] = [IMG_DISPLAY_DURATION for _ in fnames]
+        
+        resizedir = sk_imgdir / 'resize'
+        if not resizedir.exists():
+            resizedir.mkdir()
+            print(f'made directory {resizedir}')
+        
+        for i, fname in enumerate(fnames, start=1):
+            sys.stdout.write(f"Resizing Images [{'#'*(i) + ' '*(n_imgs - si)}]   \r")
             sys.stdout.flush()
             
-            path = str(self.imgdir / fname)
+            path = str(sk_imgdir / fname)
             print(path)
-            save_path = str(self.resizedir / fname)
-            print(self.resizedir)
+            save_path = str(resizedir / fname)
+            print(resizedir)
             print(save_path)
             try:
                 maxsize_pad(path, save_path)
             except Exception:
                 continue
-            self._imgpaths.append(save_path)
+            sd['imgpaths'].append(save_path)
 
+                             
+    def process_images(self):
+        for sd in self.script:
+            if sd['title'] in self.keywords:
+                self.resize_images(sd)
+    
 
-    def _make_narration(self, string, mp3path):
+    def google_tts(self, string, mp3path):
         tts = gTTS(string)
         tts.save(mp3path)
-        return AudioFileClip(mp3path)
+                        
 
+    def make_narration(self):
+        if self.narrator == 'dctts':
+            dctts_synthesize()
+            self.combine_wavs()
+        else:
+            for sd in self.script:
+                prefix = str(self.auddir / sd['title'])
+                self.google_tts(string=sd['title'], 
+                                mp3path=prefix + '_header.mp3'))
+                if sd['text']:
+                    self.google_tts(string=sd['text'],
+                                   mp3path=prefix + '_text.mp3')
 
-    def _add_ImageSequence(self, audioclip):
-        """add image with soundtrack audioclip of narrated text"""
-        ### Cycle through images so it doesn't always start at the first one
-        tmp_imgpaths = self._imgpaths[self._imgidx:] + self._imgpaths[:self._imgidx]
-        self._imgidx += 1
-        image_sequence = ImageSequenceClip(sequence=tmp_imgpaths,
-                                durations=self.fixed_durations, load_images=True).\
-                            set_position(('center', 400)).\
-                            fx(vfx.loop, duration=audioclip.duration).\
-                            set_audio(audioclip)
-        self.cliplist.append(image_sequence)
-
-
-    def _add_subsection(self, section, level):
+                             
+    def clean_text(self, text):
         """
-        Add textclip of section titles.
-        If it's just a main header followed by subsections, NO image sequence.
-        If section contains text, create narratation and image sequence.
+        Remove stop words
         """
-
-        mp3path_header = os.path.join(self.auddir, section.title + '_header.mp3')
-        ac_header = self._make_narration(section.title, mp3path_header)
-        fontsize = 130 - (30 * level) # higher level means deeper 'indentation'
-        tc_header = TextClip(section.title, color='white', fontsize=fontsize, 
-                    size=VIDEO_SIZE, method='caption').\
-                    set_audio(ac_header).set_duration(ac_header.duration)
-        self.cliplist.append(tc_header)
-        ## if there is an actual paragraph in the section, create an image sequence for it
-        if section.text:
-            mp3path_text = os.path.join(self.auddir, section.title + '_text.mp3')
-            ac_text = self._make_narration(section.text[:self.cutoff], mp3path_text)
-            self._add_ImageSequence(ac_text)
-
-        print(section.title, "complete")
+        for x in stops:
+            text = text.replace(x, '')
+        return text
 
 
-    def _flush_sections(self, sections, level=0):
-        """Recursively get text from all levels in sections,
-        and generate narrations"""
-
+    def flush_sections(self, sections, level=0):
+        """
+        Get text from all levels (sections, subsections) in page order and generate narrations
+        """
         for s in sections:
             if s.title in excluded_sections:
+                print('exluding')
                 continue
             else:
-                self._add_subsection(s, level) # clip creation
+                self.script.append({'title':s.title, 
+                                    'level': level+1, 
+                                    'text': self.clean_text(s.text)})
                 # recursion to next level. Once lowest level is reached, next main section will be accessed
-                self._flush_sections(s.sections, level+1) 
+                self.flush_sections(s.sections, level+1)
+    
+                             
+    def get_keywords(self):
+        self.keywords += [sd['title'] for sd in script if sd['text']]
 
 
-    def _flush_page(self):
-        # add main title and summary
-        mp3path_title = os.path.join(self.auddir, self.title + '_title.mp3')
-        ac_title = self._make_narration(self.title, mp3path_title)
-        tc_title = TextClip(self.title, color='white', fontsize=150, 
-                    size=VIDEO_SIZE, method='caption').\
-                    set_audio(ac_title).set_duration(ac_title.duration)
-        self.cliplist.append(tc_title)
+    def output_text(self):
+        """
+        Process page text for DC_TTS creation. Write to file. 
+        """
+        self.sent_path = self.dctts_in / f"{self.title}.txt"
+        hp.test_data = self.sent_path
         
-        mp3path_summary = os.path.join(self.auddir, self.title + '_summary.mp3')
-        ac_summary = self._make_narration(self.page.summary[:self.cutoff], mp3path_summary)
-        self._add_ImageSequence(ac_summary)
-        print('Title and Summary complete')
-        # create clips for rest of sections
-        self._flush_sections(self.page.sections)
+        with self.sent_path.open('w') as sf:
+            sf.write(f"Script for Wikipedia article {self.title}\n")
+            # Section by section
+            # sd = section_dict
+            for sd in self.script:
+                # d = {'title': section title, 'level': level, 'text': section text}
+                # Full length sentences, possibly greater than max number of characters for model
+                full_sents = [sd['title']] + sd['text'].split('.')
+                # break section down into max 180 character chunks 
+                sents = []
+                for sent in (full_sents):
+                    sent = sent.strip()
+                    if not sent:
+                        continue
+                    if len(sent) > hp.max_N:
+                        split_on = sent[:hp.max_N].rfind(" ")
+                        tmp_split = [sent[:split_on], sent[split_on:]]
+                        while len(tmp_split[-1]) > hp.max_N:
+                            last = tmp_split.pop()
+                            split_on = last[:hp.max_N].rfind(" ")
+                            tmp_split += [last[:split_on], last[split_on:]]
+                        sents.extend(tmp_split)     
+                    else:
+                        sents.append(sent)         
+                sd['n_segments'] = len(sents)    
+                for i, sent in enumerate(sents): 
+                    print(sent)
+                    sf.write(f"{sd['title']}:{i} {sent}\n")
+    
+                             
+    def combine_wavs(self):
+        """For use with dctts synthesize"""
+        ct = 1
+        for sd in self.script[:1]:
+            # convert title speech to mp3
+            AS_title = AudioSegment.from_wav(str(self.dctts_out / (str(ct) + '.wav')))
+            path = str(self.auddir / (sd['title'] + '_header.mp3'))
+            AS_title.export(path, format='mp3')
+            # combine rest of speech, convert to mp3                               
+            n = sd['n_segments']
+            AS_text = sum([AudioSegment.from_wav(str(self.dctts_out / (str(i) + '.wav'))) 
+                           for i in range(ct + 1, ct + n)])
+            path = str(self.auddir / (sd['title'] + '_text.mp3'))
+            AS_text.export(path, format='mp3')
+            ct += n
+             
+                             
+    def create_clip(self, section):
+        """
+        Load back audio and attach it to proper clip
+        Args: 
+            section (dict): A dictionary as found in self.script
+        Returns:
+            V (VideoClip): Combined TextClip and (optional) ImageSequence
+        """
+        prefix = str(self.auddir / (section['title'])
+        ACH = AudioFileClip(prefix + '_header.mp3')))
+                  
+        fontsize = 130 - (30 * section['level']) # higher level means deeper 'indentation'
+        V = TextClip(section['title'], color='white', fontsize=fontsize, 
+                    size=VIDEO_SIZE, method='caption').\
+                    set_audio(ACH).set_duration(ACH.duration)
+                             
+        if section['text']:
+            ACT = AudioFileClip(prefix + '_text.mp3'))
+                             
+            tmp_imgpaths = 
+            # self._imgidx += 1             
+            IS = ImageSequenceClip(sequence=section['imgpaths'],
+                                durations=section['idd'], load_images=True).\
+                            set_position(('center', 400)).\
+                            fx(vfx.loop, duration=ACT.duration).\
+                            set_audio(ACT)
+            V = concatenate_videoclips([V, IS])
+        print(sd['title'] clip created)
+        return V
 
-
+                             
     def make_movie(self, cutoff=None):
         """
         Args:
@@ -174,18 +260,22 @@ class WikiMovie():
         """
         print("Video Title: ", self.title)
         self.cutoff = cutoff
-        self._create_paths()
-
+        self.create_paths()
+        self.flush_sections()
+        self.output_text()
+         
         # Download and resize images
-        master_download(main_keyword=self.title, url_dir=self.url_dir,
-                        img_dir=self.imgdir, num_requested=100)
-        self._resize_images()
+        self.get_keywords()
+        master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
+                        url_dir=self.url_dir, img_dir=self.imgdir, num_requested=20)
+        self.resize_images()
         print('\n') 
-
+        
+        self.make_narration()                
         # Create Video Clips
         print("Creating clips. . .")
-        self._flush_page()
-
+        self.cliplist = [self.create_clip(sd) for sd in self.script]
+                             
         thanks = TextClip("Thanks for watching \n and listening",
                             color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
                             set_duration(2)
@@ -200,7 +290,7 @@ class WikiMovie():
         # Encode Video
         start = datetime.now()
         self.video.write_videofile(str(self.vidpath) , fps=1, codec='mpeg4', 
-                                    audio_codec="aac", preset='ultrafast')
+                                   audio_codec="aac", preset='ultrafast')
         dur = datetime.now() - start
         print("Video Encoding completed in time: ", dur)
 
@@ -209,6 +299,7 @@ class WikiMovie():
         thanks.close()
         subscribe.close()
         self.video.close()
+        
 
 
 if __name__ == "__main__":

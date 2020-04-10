@@ -1,32 +1,94 @@
 Script for Wikipedia article Bokmål
 Bokmål:0 Bokmål
 Bokmål:1 Bokmål (UK: , US: ; literally "book tongue") is an official written standard for the Norwegian language, alongside Nynorsk
-Bokmål:2  Bokmål is the preferred written standard of Norwegian for 85% to 90% of the population in Norway
-Bokmål:3  Unlike, for instance, the Italian language, there is no nationwide standard or agreement on the pronunciation of Bokmål
-Bokmål:4 
-Bokmål is regulated by the governmental Norwegian Language Council
-Bokmål:5  A more conservative orthographic standard, commonly known as Riksmål, is regulated by the non-governmental Norwegian Academy for Language and Literature
-Bokmål:6  The written standard is a Norwegianised variety of the Danish language
-Bokmål:7 
-The first Bokmål orthography was officially adopted in 1907 under the name Riksmål after being under development since 1879
-Bokmål:8  The architects behind the reform were Marius Nygaard and Jacob Jonathan Aars
-Bokmål:9  It was an adaptation of written Danish, which was commonly used since the past union with Denmark, to the Dano-Norwegian koiné spoken by the Norwegian urban elite, especially in
+Bokmål:2 Bokmål is the preferred written standard of Norwegian for 85% to 90% of the population in Norway
+Bokmål:3 Unlike, for instance, the Italian language, there is no nationwide standard or agreement on the pronunciation of Bokmål
+Bokmål:4 Bokmål is regulated by the governmental Norwegian Language Council
+Bokmål:5 A more conservative orthographic standard, commonly known as Riksmål, is regulated by the non-governmental Norwegian Academy for Language and Literature
+Bokmål:6 The written standard is a Norwegianised variety of the Danish language
+Bokmål:7 The first Bokmål orthography was officially adopted in 1907 under the name Riksmål after being under development since 1879
+Bokmål:8 The architects behind the reform were Marius Nygaard and Jacob Jonathan Aars
+Bokmål:9 It was an adaptation of written Danish, which was commonly used since the past union with Denmark, to the Dano-Norwegian koiné spoken by the Norwegian urban elite, especially in
 Bokmål:10  the capital
-Bokmål:11  When the large conservative newspaper Aftenposten adopted the 1907 orthography in 1923, Danish writing was practically out of use in Norway
-Bokmål:12  The name Bokmål was officially adopted in 1929 after a proposition to call the written language Dano-Norwegian lost by a single vote in the Lagting (a chamber in the Norwegian
+Bokmål:11 When the large conservative newspaper Aftenposten adopted the 1907 orthography in 1923, Danish writing was practically out of use in Norway
+Bokmål:12 The name Bokmål was officially adopted in 1929 after a proposition to call the written language Dano-Norwegian lost by a single vote in the Lagting (a chamber in the Norwegian
 Bokmål:13  parliament)
 Bokmål:14 The government does not regulate spoken Bokmål and recommends that normalised pronunciation should follow the phonology of the speaker's local dialect
-Bokmål:15  Nevertheless, there is a spoken variety of Norwegian that, in the region of South-Eastern Norway, is commonly seen as the de facto standard for spoken Bokmål
-Bokmål:16  In The Phonology of Norwegian, Gjert Kristoffersen writes that
-
-Bokmål  is in its most common variety looked upon as reflecting formal middle-class urban speech, especially that
+Bokmål:15 Nevertheless, there is a spoken variety of Norwegian that, in the region of South-Eastern Norway, is commonly seen as the de facto standard for spoken Bokmål
+Bokmål:16 In The Phonology of Norwegian, Gjert Kristoffersen writes thatBokmål  is in its most common variety looked upon as reflecting formal middle-class urban speech, especially that
 Bokmål:17  found in the eastern part of Southern Norway , with the capital Oslo as the obvious centre
-Bokmål:18  One can therefore say that Bokmål has a spoken realisation that one might call an unofficial standard spoken Norwegian
-Bokmål:19  It is in fact often referred to as Standard Østnorsk ('Standard East Norwegian')
-Bokmål:20 
-Standard Østnorsk (Standard East Norwegian) is the pronunciation most commonly given in dictionaries and taught to foreigners in Norwegian language classes
-Bokmål:21  Standard Østnorsk as a spoken language is not used and does not have any particular prestige outside South-Eastern Norway
-Bokmål:22  All spoken variations of the Norwegian language are used  in the Storting and in Norwegian national broadcasters such as NRK and TV 2, even in cases where the conventions of
+Bokmål:18 One can therefore say that Bokmål has a spoken realisation that one might call an unofficial standard spoken Norwegian
+Bokmål:19 It is in fact often referred to as Standard Østnorsk ('Standard East Norwegian')
+Bokmål:20 Standard Østnorsk (Standard East Norwegian) is the pronunciation most commonly given in dictionaries and taught to foreigners in Norwegian language classes
+Bokmål:21 Standard Østnorsk as a spoken language is not used and does not have any particular prestige outside South-Eastern Norway
+Bokmål:22 All spoken variations of the Norwegian language are used  in the Storting and in Norwegian national broadcasters such as NRK and TV 2, even in cases where the conventions of
 Bokmål:23  Bokmål are used
-Bokmål:24  The spoken variation typically reflects the region the person grew up in
-Bokmål:25 
+Bokmål:24 The spoken variation typically reflects the region the person grew up in
+History:0 History
+History:1 Up until about 1300, the written language of Norway, Old Norwegian, was essentially the same as the other Old Norse dialects
+History:2 The speech, however, was gradually differentiated into local and regional dialects
+History:3 As long as Norway remained an independent kingdom, the written language remained essentially constant
+History:4 In 1380, Norway entered into a personal union with Denmark
+History:5 By the early 16th century, Norway had lost its separate political institutions, and together with Denmark formed the political unit known as Denmark–Norway until 1814,
+History:6  progressively becoming the weaker member of the union
+History:7 During this period, the modern Danish and Norwegian languages emerged
+History:8 Norwegian went through a Middle Norwegian transition, and a Danish written language more heavily influenced by Low German was gradually standardised
+History:9 This process was aided by the Reformation, which prompted Christiern Pedersen's translation of the Bible into Danish
+History:10 Remnants of written Old Norse and Norwegian were thus displaced by the Danish standard, which became used for virtually all administrative documents
+History:11 Norwegians used Danish primarily in writing, but it gradually came to be spoken by urban elites on formal or official occasions
+History:12 Although Danish never became the spoken language of the vast majority of the population, by the time Norway's ties with Denmark were severed in 1814, a Dano-Norwegian vernacular
+History:13  often called the "educated daily speech" had become the mother tongue of elites in most Norwegian cities, such as Bergen, Kristiania and Trondheim
+History:14 This Dano-Norwegian koiné could be described as Danish with regional Norwegian pronunciation (see Norwegian dialects), some Norwegian vocabulary, and simplified grammar
+History:15 With the gradual subsequent process of Norwegianisation of the written language used in the cities of Norway, from Danish to Bokmål and Riksmål, the upper-class sociolects in the
+History:16  cities changed accordingly
+History:17 In 1814, when Norway was ceded from Denmark to Sweden, Norway defied Sweden and her allies, declared independence and adopted a democratic constitution
+History:18 Although compelled to submit to a dynastic union with Sweden, this spark of independence continued to burn, influencing the evolution of language in Norway
+History:19 Old language traditions were revived by the patriotic poet Henrik Wergeland (1808–1845), who championed an independent non-Danish written language
+History:20 Haugen indicates that:"Within the first generation of liberty, two solutions emerged and won adherents, one based on the speech of the upper class and one on that of the common
+History:21  people
+History:22 The former called for Norwegianisation of the Danish writing, the latter for a brand new start
+History:23 "The more conservative of the two language transitions was advanced by the work of writers like Peter Asbjørnsen and Jørgen Moe, schoolmaster and agitator for language reform Knud
+History:24  Knudsen, and Knudsen's famous disciple, Bjørnstjerne Bjørnson, as well as a more cautious Norwegianisation by Henrik Ibsen
+History:25 In particular, Knudsen's work on language reform in the mid-19th century was important for the 1907 orthography and a subsequent reform in 1917, so much so that he is now often
+History:26  called the "father of Bokmål"
+Controversy:0 Controversy
+Riksmål vs. Bokmål:0 Riksmål vs. Bokmål
+Riksmål vs. Bokmål:1 The term Riksmål, meaning National Language, was first proposed by Bjørnstjerne Bjørnson in 1899 as a name for the Norwegian variety of written Danish as well as spoken
+Riksmål vs. Bokmål:2  Dano-Norwegian
+Riksmål vs. Bokmål:3 It was borrowed from Denmark where it denoted standard written and spoken Danish
+Riksmål vs. Bokmål:4 The same year the Riksmål movement became organised under his leadership in order to fight against the growing influence of Nynorsk, eventually leading to the foundation of the
+Riksmål vs. Bokmål:5  non-governmental organisation Riksmålsforbundet in 1907
+Riksmål vs. Bokmål:6 Bjørnson became Riksmålsforbundet's first leader until his death in 1910
+Riksmål vs. Bokmål:7 The 1917 reform introduced some elements from Norwegian dialects and Nynorsk as optional alternatives to traditional Dano-Norwegian forms
+Riksmål vs. Bokmål:8 This was part of an official policy to bring the two Norwegian languages more closely together, intending eventually to merge them into one
+Riksmål vs. Bokmål:9 These changes met resistance from the Riksmål movement, and Riksmålsvernet (The Society for the Protection of Riksmål) was founded in 1919
+Riksmål vs. Bokmål:10 The 1938 reform in Bokmål introduced more elements from dialects and Nynorsk, and more importantly, many traditional Dano-Norwegian forms were excluded
+Riksmål vs. Bokmål:11 This so-called radical Bokmål or Samnorsk (Common Norwegian) met even stiffer resistance from the Riksmål movement, culminating in the 1950s under the leadership of Arnulf Øverland
+Riksmål vs. Bokmål:12 Riksmålsforbundet organised a parents' campaign against Samnorsk in 1951, and the Norwegian Academy for Language and Literature was founded in 1953
+Riksmål vs. Bokmål:13 Because of this resistance, the 1959 reform was relatively modest, and the radical reforms were partially reverted in 1981 and 2005
+Riksmål vs. Bokmål:14 Currently, Riksmål denotes the moderate, chiefly pre-1938, unofficial variant of Bokmål, which is still in use and is regulated by the Norwegian Academy and promoted by
+Riksmål vs. Bokmål:15  Riksmålsforbundet
+Riksmål vs. Bokmål:16 Riksmål has gone through some spelling reforms, but none as profound as the ones that shaped Bokmål
+Riksmål vs. Bokmål:17 A Riksmål dictionary was published in four volumes in the period 1937 to 1957 by Riksmålsvernet, and two supplementary volumes were published in 1995 by the Norwegian Academy
+Riksmål vs. Bokmål:18 After the latest Bokmål reforms, the difference between Bokmål and Riksmål have diminished and they are now comparable to American and British English differences, but the
+Riksmål vs. Bokmål:19  Norwegian Academy still upholds its own standard
+Riksmål vs. Bokmål:20 Norway's most popular daily newspaper, Aftenposten, is notable for its use of Riksmål as its standard language
+Riksmål vs. Bokmål:21 Use of Riksmål is rigorously pursued, even with regard to readers' letters, which are "translated" into the standard
+Terminology:0 Terminology
+Terminology:1 In the Norwegian discourse, the term Dano-Norwegian is seldom used with reference to contemporary Bokmål and its spoken varieties
+Terminology:2 The nationality of the language has been a hotly debated topic, and its users and proponents have generally not been fond of the implied association with Danish (hence the neutral
+Terminology:3  names Riksmål and Bokmål, meaning state language and book language respectively)
+Terminology:4 The debate intensified with the advent of Nynorsk in the 19th century, a written language based on rural Modern Norwegian dialects and puristic opposition to the Danish and
+Terminology:5  Dano-Norwegian spoken in Norwegian cities
+Characteristics:0 Characteristics
+Differences from Danish:0 Differences from Danish
+Differences from Danish:1 The following table shows a few central differences between Bokmål and Danish
+Differences from the traditional Oslo dialect:0 Differences from the traditional Oslo dialect
+Differences from the traditional Oslo dialect:1 Most natives of Oslo today speak a dialect that is an amalgamation of vikværsk (which is the technical term for the traditional dialects in the Oslofjord area) and written Danish;
+Differences from the traditional Oslo dialect:2  and subsequently Riksmål and Bokmål, which primarily inherited their non-Oslo elements from Danish
+Differences from the traditional Oslo dialect:3 The present day Oslo dialect is also influenced by other Eastern Norwegian dialects
+Differences from the traditional Oslo dialect:4 The following table shows some important cases where traditional Bokmål and Standard Østnorsk followed Danish rather than the traditional Oslo dialect as it is commonly portrayed
+Differences from the traditional Oslo dialect:5  in literature about Norwegian dialects
+Differences from the traditional Oslo dialect:6 In many of these cases, radical Bokmål follows the traditional Oslo dialect and Nynorsk, and these forms are also given
+Differences from the traditional Oslo dialect:7 1 Closest match to the traditional Oslo dialect
+Differences from the traditional Oslo dialect:8 2 However, Bokmål uses ku "cow" and (now archaic) su "sow" exclusively
