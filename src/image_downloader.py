@@ -37,7 +37,7 @@ def file_len(fname):
             pass
     return i + 1 # I will be the index of the last line. 1 is added to account for the folder of resized images.
 
-def get_image_links(main_keyword, url_dir, supplemented_keywords=" ", num_requested = 20, connection_speed = "medium"):
+def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested = 20, connection_speed = "medium"):
     """get image links with selenium
     
     Args:
@@ -222,7 +222,7 @@ def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
             downloaded_num = os.stat(sk_img_dir).st_nlink 
             print(f"\nSuccessfully downloaded {downloaded_num} images")
                 
-def master_download(main_keyword, url_dir, img_dir, num_requested = 20, supplemented_keywords=[' ']):
+def master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_requested = 20, connection_speed = "medium"):
     """
     Retrieve image URLs and download, in two step process.
 
@@ -233,11 +233,11 @@ def master_download(main_keyword, url_dir, img_dir, num_requested = 20, suppleme
     Returns:
         None
     """
-    link_file_path = get_image_links(main_keyword, url_dir, supplemented_keywords, num_requested)
-    download_images(main_keyword, link_file_path, img_dir)
+    get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested = num_requested, connection_speed = connection_speed)
+    download_images(main_keyword, supplemented_keywords, url_dir, img_dir)
 
 
 if __name__ == "__main__":
     main_keywords = ['Badger']
 
-    supplemented_keywords = [' ']
+    supplemented_keywords = ["Tiny","Huge","Cute"]
