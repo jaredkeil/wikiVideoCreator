@@ -10,6 +10,8 @@ LJ_logdir/
 # Ignoring Images Directory
 *.jpg
 *.png
+images/
+url_files/
 
 #Ignore virtual Environment
 youtube_upload/
