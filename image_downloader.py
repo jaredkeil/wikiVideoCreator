@@ -126,13 +126,16 @@ def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested 
                 print(mk_url_dir, "exists")
 
             # Defining link file path    
-            fname = f"{main_keyword + '/' + keyword}.txt"
+            if keyword != " ":
+                fname = f"{main_keyword + '/' + keyword}.txt"
+            elif keyword == " ":
+                fname = f"{main_keyword + '/' + main_keyword}.txt"
             link_file_path = url_dir / fname
             if not link_file_path.exists():
                 link_file_path.touch(mode=0o777)
                 print(f"Made file {link_file_path}")
             
-            # Storing url links in file
+            # Saving url links in file
             with link_file_path.open('w') as wf:
                 for url in img_urls:
                     # print(url)
