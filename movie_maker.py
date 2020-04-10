@@ -262,7 +262,7 @@ class WikiMovie():
         self.cutoff = cutoff
         self.create_paths()
         
-        self.flush_sections()
+        self.flush_sections(self.page.sections)
         
         self.output_text()
         hp.test_data = str(WMM.sent_path)
@@ -310,4 +310,4 @@ if __name__ == "__main__":
     wiki = wikipediaapi.Wikipedia('en')
     page = wiki.page(input("What would you like the video to be about? "))
     WMM = WikiMovie(page, narrator='gtts')
-    WMM.make_movie(cutoff=None)
+    WMM.make_movie(cutoff=None, hp=hp)
