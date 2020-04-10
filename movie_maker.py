@@ -45,11 +45,11 @@ class WikiMovie():
         self.script = [{'title': page.title, 
                         'level': 0, 
                         'text': self.clean_text(page.summary)}]
-        self.keywords = ['']
+        self.keywords = [' ']
         self.cliplist = []
         
-        # self.p = Path(__file__).resolve().parents[1]
-        self.p = Path(os.path.abspath('')).resolve() ## For jupyter notebook
+        self.p = Path(__file__).resolve().parents[0]
+        # self.p = Path(os.path.abspath('')).resolve() ## For jupyter notebook
         self._imgidx = 0 # For starting image seqeunces on unique image
         self.cutoff = None
         
@@ -128,9 +128,8 @@ class WikiMovie():
             if len(os.listdir(self.dctts_out)) > 0 and self.overwrite == False:
                 print('Not going to make narration')
             else:
-#                 dctts_synthesize()
-                pass
-#             self.combine_wavs()
+                dctts_synthesize()
+                self.combine_wavs()
         else:
             for sd in self.script:
                 prefix = str(self.auddir / sd['title'])
@@ -166,7 +165,7 @@ class WikiMovie():
     
                              
     def get_keywords(self):
-        self.keywords += [sd['title'] for sd in self.script if sd['text']]
+        self.keywords += [sd['title'] for sd in self.script[1:] if sd['text']]
 
 
     def output_text(self):
@@ -208,7 +207,7 @@ class WikiMovie():
     def combine_wavs(self):
         """For use with dctts synthesize"""
         ct = 1
-        for sd in self.script[:1]:
+        for sd in self.script:
             # convert title speech to mp3
             AS_title = AudioSegment.from_wav(str(self.dctts_out / (str(ct) + '.wav')))
             path = str(self.auddir / (sd['title'] + '_header.mp3'))
@@ -310,5 +309,5 @@ class WikiMovie():
 if __name__ == "__main__":
     wiki = wikipediaapi.Wikipedia('en')
     page = wiki.page(input("What would you like the video to be about? "))
-    WMM = WikiMovie(page)
+    WMM = WikiMovie(page, narrator='gtts')
     WMM.make_movie(cutoff=None)

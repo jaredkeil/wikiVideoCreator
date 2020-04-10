@@ -157,19 +157,19 @@ def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
         None
     """
     # Creating paths reletive to this file's location
-    p = Path(__file__).resolve().parents[0]
-    # mk_img_dir = p / img_dir / main_keyword
+    p = Path(__file__).resolve().parents[1]
+    mk_img_dir = p / img_dir / main_keyword
 
     
     # Creating file paths to save images to
 
-    if not os.path.exists(img_dir):
-        os.makedirs(img_dir)
+    if not os.path.exists(mk_img_dir):
+        os.makedirs(mk_img_dir)
     
     for ind, s_keyword in enumerate(supplemented_keywords):
 
         link_file_path = url_dir / main_keyword / f"{s_keyword}.txt" # sets the path to the url file to access 
-        sk_img_dir = img_dir / s_keyword # sets the path to the direstory on where to save images to
+        sk_img_dir = mk_img_dir / s_keyword # sets the path to the direstory on where to save images to
 
         # Creates directory to save supplimental keywords to
         if not os.path.exists(sk_img_dir):
@@ -229,7 +229,7 @@ def master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_
     Args:
         main_keyword (str): Keyword to search google with
         url_dir: directory to store the generated .txt file containing list of image URLs
-        img_dir: parent directory to store the downloaded images
+        img_dir: directory to store the downloaded images
     Returns:
         None
     """
@@ -238,15 +238,6 @@ def master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_
 
 
 if __name__ == "__main__":
-    p = Path(os.getcwd())
+    main_keywords = ['Badger']
 
-    main_keyword = "Badger"
     supplemented_keywords = ["Tiny","Huge","Cute"]
-
-    url_dir = p / "url_files" 
-    img_dir = p / "images" / main_keyword
-
-    
-
-    master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_requested = 5, connection_speed = "medium")
-    
