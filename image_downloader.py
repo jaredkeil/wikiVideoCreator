@@ -175,8 +175,10 @@ def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
         
         if s_keyword != " ":
             sk_img_dir = img_dir / s_keyword # sets the path to the direstory on where to save images to
+            link_file_path = url_dir / main_keyword / f"{s_keyword}.txt" # sets the path to the url file to access 
         elif s_keyword == " ":
             sk_img_dir = img_dir / main_keyword # sets the path to the direstory on where to save images to
+            link_file_path = url_dir / main_keyword / f"{main_keyword}.txt" # sets the path to the url file to access 
 
         # Creates directory to save supplimental keywords to
         if not os.path.exists(sk_img_dir):
