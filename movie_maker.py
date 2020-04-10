@@ -37,20 +37,19 @@ class WikiMovie():
     Initialize with 'page' object from wikipedia Python module.
     Primary user function is make_movie().
     """
-    def __init__(self, page, narrator='gtts'):
+    def __init__(self, page, narrator='gtts', overwrite=True):
         self.page = page
         self.title = self.page._attributes['title']
         self.narrator = narrator
-        if self.narrator == 'dc_tts': self.sff = '.wav' # sound file format
-        else: self.sff = '.mp3'
+        self.overwrite = overwrite
         self.script = [{'title': page.title, 
                         'level': 0, 
                         'text': self.clean_text(page.summary)}]
         self.keywords = ['']
         self.cliplist = []
         
-        self.p = Path(__file__).resolve().parents[1]
-        # self.p = Path(os.path.abspath('')).resolve() ## For jupyter notebook
+        # self.p = Path(__file__).resolve().parents[1]
+        self.p = Path(os.path.abspath('')).resolve() ## For jupyter notebook
         self._imgidx = 0 # For starting image seqeunces on unique image
         self.cutoff = None
         
@@ -60,11 +59,11 @@ class WikiMovie():
         self.parent_images = self.p / 'images'
         self.imgdir = self.p / 'images'/ self.title
 #         self.resizedir = self.imgdir / 'resize'
-        # gTTS audio directories
+        # audio directories
         self.parent_audio = self.p / 'audio'
         self.auddir = self.p / 'audio' / self.title
         # dc_tts directory
-        self.dctts_dir = self.p / 'dctts'
+        self.dctts_dir = self.p / 'dc_tts'
         self.dctts_in = self.dctts_dir / 'text_input'
         self.dctts_out = self.dctts_dir / 'samples' / self.title
         # URL lists text files directory
@@ -122,16 +121,21 @@ class WikiMovie():
         tts = gTTS(string)
         tts.save(mp3path)
                         
-
+    
     def make_narration(self):
         if self.narrator == 'dctts':
-            dctts_synthesize()
-            self.combine_wavs()
+            #check if narration already exists
+            if len(os.listdir(self.dctts_out)) > 0 and self.overwrite == False:
+                print('Not going to make narration')
+            else:
+#                 dctts_synthesize()
+                pass
+#             self.combine_wavs()
         else:
             for sd in self.script:
                 prefix = str(self.auddir / sd['title'])
                 self.google_tts(string=sd['title'], 
-                                mp3path=prefix + '_header.mp3'))
+                                mp3path=prefix + '_header.mp3')
                 if sd['text']:
                     self.google_tts(string=sd['text'],
                                    mp3path=prefix + '_text.mp3')
@@ -145,14 +149,13 @@ class WikiMovie():
             text = text.replace(x, '')
         return text
 
-
     def flush_sections(self, sections, level=0):
         """
         Get text from all levels (sections, subsections) in page order and generate narrations
         """
         for s in sections:
             if s.title in excluded_sections:
-                print('exluding')
+                print('exluding', s.title)
                 continue
             else:
                 self.script.append({'title':s.title, 
@@ -163,7 +166,7 @@ class WikiMovie():
     
                              
     def get_keywords(self):
-        self.keywords += [sd['title'] for sd in script if sd['text']]
+        self.keywords += [sd['title'] for sd in self.script if sd['text']]
 
 
     def output_text(self):
@@ -199,7 +202,6 @@ class WikiMovie():
                         sents.append(sent)         
                 sd['n_segments'] = len(sents)    
                 for i, sent in enumerate(sents): 
-                    print(sent)
                     sf.write(f"{sd['title']}:{i} {sent}\n")
     
                              
@@ -228,8 +230,8 @@ class WikiMovie():
         Returns:
             V (VideoClip): Combined TextClip and (optional) ImageSequence
         """
-        prefix = str(self.auddir / (section['title'])
-        ACH = AudioFileClip(prefix + '_header.mp3')))
+        prefix = str(self.auddir / section['title'])
+        ACH = AudioFileClip(prefix + '_header.mp3')
                   
         fontsize = 130 - (30 * section['level']) # higher level means deeper 'indentation'
         V = TextClip(section['title'], color='white', fontsize=fontsize, 
@@ -237,9 +239,8 @@ class WikiMovie():
                     set_audio(ACH).set_duration(ACH.duration)
                              
         if section['text']:
-            ACT = AudioFileClip(prefix + '_text.mp3'))
+            ACT = AudioFileClip(prefix + '_text.mp3')
                              
-            tmp_imgpaths = 
             # self._imgidx += 1             
             IS = ImageSequenceClip(sequence=section['imgpaths'],
                                 durations=section['idd'], load_images=True).\
@@ -247,11 +248,11 @@ class WikiMovie():
                             fx(vfx.loop, duration=ACT.duration).\
                             set_audio(ACT)
             V = concatenate_videoclips([V, IS])
-        print(sd['title'] clip created)
+    
         return V
 
                              
-    def make_movie(self, cutoff=None):
+    def make_movie(self, hp, cutoff=None):
         """
         Args:
             cutoff (int): Limit the length of the script. Used like script[:cutoff]
@@ -261,9 +262,12 @@ class WikiMovie():
         print("Video Title: ", self.title)
         self.cutoff = cutoff
         self.create_paths()
+        
         self.flush_sections()
+        
         self.output_text()
-         
+        hp.test_data = str(WMM.sent_path)
+        hp.sampledir = str(WMM.dctts_out) 
         # Download and resize images
         self.get_keywords()
         master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
@@ -274,7 +278,9 @@ class WikiMovie():
         self.make_narration()                
         # Create Video Clips
         print("Creating clips. . .")
-        self.cliplist = [self.create_clip(sd) for sd in self.script]
+        for sd in self.script:
+            self.create_clip(sd)
+
                              
         thanks = TextClip("Thanks for watching \n and listening",
                             color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
@@ -300,7 +306,6 @@ class WikiMovie():
         subscribe.close()
         self.video.close()
         
-
 
 if __name__ == "__main__":
     wiki = wikipediaapi.Wikipedia('en')
