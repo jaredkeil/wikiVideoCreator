@@ -20,6 +20,7 @@ from tqdm import tqdm
 
 def synthesize():
     # Load data
+    print(hp.test_data)
     L = load_data("synthesize")
 
     # Load graph

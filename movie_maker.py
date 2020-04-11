@@ -97,19 +97,18 @@ class WikiMovie():
         
         sd['imgpaths'] = [] #image paths
         for i, fname in enumerate(fnames, start=1):
-            sys.stdout.write(f"Resizing Images [{'#'*(i) + ' '*(n_imgs - i)}]   \r")
+            sys.stdout.write(f"Resizing {sd['title']} Images [{'#'*(i) + ' '*(n_imgs - i)}]   \r")
             sys.stdout.flush()
             
             path = str(sk_imgdir / fname)
-            # print('original path:', path)
             save_path = str(resizedir / fname)
-            print('save path:', save_path)
             try:
                 maxsize_pad(path, save_path)
             except Exception:
                 print(f'error saving resized image: {fname}')
                 continue
             sd['imgpaths'].append(save_path)
+        print('done')
 
                              
     def process_images(self):
@@ -193,6 +192,7 @@ class WikiMovie():
                     if not sent:
                         continue
                     if len(sent) > hp.max_N:
+                        print('splitting')
                         split_on = sent[:hp.max_N].rfind(" ")
                         tmp_split = [sent[:split_on], sent[split_on:]]
                         while len(tmp_split[-1]) > hp.max_N:
@@ -204,7 +204,7 @@ class WikiMovie():
                         sents.append(sent)         
                 sd['n_segments'] = len(sents)    
                 for i, sent in enumerate(sents): 
-                    sf.write(f"{sd['title']}:{i} {sent}\n")
+                    sf.write(f":{i} {sent}\n")
     
                              
     def combine_wavs(self):
@@ -245,11 +245,11 @@ class WikiMovie():
             print(sd['imgpaths'])   
             print(sd['idd'])              
             IS = ImageSequenceClip(sequence=sd['imgpaths'],
-                                durations=sd['idd'], load_images=True).\
+                                 durations=sd['idd'], load_images=True).\
                             set_position(('center', 400)).\
                             fx(vfx.loop, duration=ACT.duration).\
                             set_audio(ACT)
-            V = concatenate_videoclips([V, IS])
+            V = concatenate_videoclips([V, IS], method='compose')
         print(sd['title'], 'clip created!')
         V = V.set_fps(1)
         return V
@@ -271,6 +271,7 @@ class WikiMovie():
         self.output_text()
         hp.test_data = str(WMM.sent_path)
         hp.sampledir = str(WMM.dctts_out) 
+        print("mmtest",hp.test_data)
         # Download and resize images
         self.get_keywords()
         # master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
@@ -286,16 +287,16 @@ class WikiMovie():
                              
         thanks = TextClip("Thanks for watching \n and listening",
                             color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
-                            set_duration(2).set_fps(1)
+                            set_duration(2)
 
         subscribe = TextClip("Please Subscribe!",
                                 color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
-                                set_duration(2).set_fps(1)
+                                set_duration(2)
 
         self.video = concatenate_videoclips(self.cliplist + [thanks, subscribe],
                                             method='compose').\
-                                            on_color(color=BLACK, col_opacity=1).\
-                                            set_fps(1)
+                                            on_color(color=BLACK, col_opacity=1)
+        
         # Encode Video
         start = datetime.now()
         # self.video.preview()
@@ -304,8 +305,6 @@ class WikiMovie():
         dur = datetime.now() - start
         print("Video Encoding completed in time: ", dur)
 
-        # self.audio_clip.close()
-        # title_text.close()
         thanks.close()
         subscribe.close()
         self.video.close()
@@ -313,6 +312,7 @@ class WikiMovie():
 
 if __name__ == "__main__":
     wiki = wikipediaapi.Wikipedia('en')
-    page = wiki.page(input("What would you like the video to be about? "))
-    WMM = WikiMovie(page, narrator='gtts', overwrite=False)
+    # page = wiki.page(input("What would you like the video to be about? "))
+    page = wiki.page("WWE SmackDown")
+    WMM = WikiMovie(page, narrator='dctts', overwrite=True)
     WMM.make_movie(cutoff=None, hp=hp)
