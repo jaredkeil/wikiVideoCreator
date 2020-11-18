@@ -7,7 +7,7 @@ LJ_logdir/
 *.mp3
 *.mp4
 
-# Ignoring Images Directory
+# Ignore Images Directory
 *.jpg
 *.png
 images/
@@ -16,7 +16,9 @@ url_files/
 #Ignore virtual Environment
 youtube_upload/
 
-# 
+# Ignore oauth access tokens
+*oauth-2.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
