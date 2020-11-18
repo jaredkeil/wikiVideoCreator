@@ -16,8 +16,9 @@ url_files/
 #Ignore virtual Environment
 youtube_upload/
 
-# Ignore oauth access tokens
+# Ignore access files
 *oauth-2.json
+client_secrets.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
