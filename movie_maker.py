@@ -130,7 +130,7 @@ class WikiMovie():
             if len(os.listdir(self.dctts_out)) > 0 and self.overwrite == False:
                 print('Not going to make narration')
             else:
-                dctts_synthesize()
+                # dctts_synthesize()
                 self.combine_wavs()
         else:
             for sd in self.script:
@@ -181,6 +181,7 @@ class WikiMovie():
             sf.write(f"Script for Wikipedia article {self.title}\n")
             # Section by section
             # sd = section_dict
+            sample_ct = 0
             for sd in self.script:
                 # d = {'title': section title, 'level': level, 'text': section text}
                 # Full length sentences, possibly greater than max number of characters for model
@@ -202,9 +203,11 @@ class WikiMovie():
                         sents.extend(tmp_split)     
                     else:
                         sents.append(sent)         
-                sd['n_segments'] = len(sents)    
+                sd['n_segments'] = len(sents)
+                sample_ct += len(sents)
+                pre = sd['title'].replace(" ", "")
                 for i, sent in enumerate(sents): 
-                    sf.write(f":{i} {sent}\n")
+                    sf.write(f"{pre}:{i} {sent}\n")
     
                              
     def combine_wavs(self):
@@ -212,15 +215,21 @@ class WikiMovie():
         ct = 1
         for sd in self.script:
             # convert title speech to mp3
-            AS_title = AudioSegment.from_wav(str(self.dctts_out / (str(ct) + '.wav')))
+            print(sd['title'])
+            AS_title = AudioSegment.from_wav(str(self.dctts_out / str(ct)) + '.wav')
             path = str(self.auddir / (sd['title'] + '_header.mp3'))
             AS_title.export(path, format='mp3')
             # combine rest of speech, convert to mp3                               
+            
             n = sd['n_segments']
-            AS_text = sum([AudioSegment.from_wav(str(self.dctts_out / (str(i) + '.wav'))) 
-                           for i in range(ct + 1, ct + n)])
-            path = str(self.auddir / (sd['title'] + '_text.mp3'))
-            AS_text.export(path, format='mp3')
+            print(n, "segments")
+            if sd['title'] in self.keywords or sd['level'] == 0:
+                AS_text = AudioSegment.from_wav(str(self.dctts_out / str(ct+1)) + '.wav')
+                for i in range(ct+2, ct+n):
+                    AS_text += AudioSegment.from_wav(str(self.dctts_out / str(i)) + '.wav')
+                path = str(self.auddir / (sd['title'] + '_text.mp3'))
+                AS_text.export(path, format='mp3')
+
             ct += n
              
                              
@@ -283,7 +292,7 @@ class WikiMovie():
         print('creating audio')               
         # Create Video Clips
         print("Creating clips. . .")
-        self.cliplist = [self.create_clip(sd) for sd in self.script[:1]]
+        self.cliplist = [self.create_clip(sd) for sd in self.script]
                              
         thanks = TextClip("Thanks for watching \n and listening",
                             color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
