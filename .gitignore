@@ -18,7 +18,7 @@ youtube_upload/
 
 # Ignore access files
 *oauth-2.json
-client_secrets.json
+*client_secrets.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
