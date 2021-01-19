@@ -34,10 +34,17 @@ stops = {'\n', '\t', 'e.g.', '[sic]', '[...]', 'i.e.',}
 class WikiMovie():
     """
     Make movies in standard format (.mp4) from wikipedia pages.
+
     Initialize with 'page' object from wikipedia Python module.
-    Primary user function is make_movie().
+    Primary function is make_movie().
     """
     def __init__(self, page, narrator='gtts', overwrite=True):
+        """
+        Args:
+        page (wikipediaapi.WikipediaPage) -- Specific page object used to make movie.
+        narrator (str) -- text-to-speech engine ["gtts"= google, "dctts"=neural net] (default "gtts")
+        overwrite (bool) -- Overwrite audio (default True) 
+        """
         self.page = page
         self.title = self.page._attributes['title']
         self.narrator = narrator
@@ -58,7 +65,7 @@ class WikiMovie():
         # Image directories
         self.parent_images = self.p / 'images'
         self.imgdir = self.p / 'images'/ self.title
-#         self.resizedir = self.imgdir / 'resize'
+        self.resizedir = self.imgdir / 'resize'
         # audio directories
         self.parent_audio = self.p / 'audio'
         self.auddir = self.p / 'audio' / self.title
@@ -74,7 +81,7 @@ class WikiMovie():
         self.vidpath = self.viddir / (self.title + ".mp4")
 
         print('creating paths...')
-        for d in [self.imgdir, self.parent_audio, self.auddir, self.dctts_dir,\
+        for d in [self.imgdir, self.resizedir, self.parent_audio, self.auddir, self.dctts_dir,\
                 self.dctts_in, self.dctts_out, self.url_dir, self.viddir]:
             if not d.exists():
                 d.mkdir()
@@ -90,10 +97,10 @@ class WikiMovie():
         n_imgs = len(fnames)
         sd['idd'] = [IMG_DISPLAY_DURATION for _ in fnames]
         
-        resizedir = sk_imgdir / 'resize'
-        if not resizedir.exists():
-            resizedir.mkdir()
-            print(f'made directory {resizedir}')
+        # resizedir = sk_imgdir / 'resize'
+        # if not resizedir.exists():
+        #     resizedir.mkdir()
+        #     print(f'made directory {resizedir}')
         
         sd['imgpaths'] = [] #image paths
         for i, fname in enumerate(fnames, start=1):
@@ -101,47 +108,53 @@ class WikiMovie():
             sys.stdout.flush()
             
             path = str(sk_imgdir / fname)
-            save_path = str(resizedir / fname)
+            save_path = str(self.resizedir / fname)
             try:
                 maxsize_pad(path, save_path)
             except Exception:
                 print(f'error saving resized image: {fname}')
                 continue
             sd['imgpaths'].append(save_path)
-        print('done')
-
-                             
+        print('\ndone')
+                         
     def process_images(self):
         for sd in self.script:
             if sd['title'] in self.keywords or sd['level'] == 0:
                 self.resize_images(sd)
     
-
     def google_tts(self, string, mp3path):
+        error_count = 0
         tts = gTTS(string)
-        tts.save(mp3path)
-                        
+        while True:
+            try:
+                tts.save(mp3path)
+                break
+            except Exception as e:
+                print(e)
+                print(f'gTTS save error, trying again. Error count: {error_count}')
+                error_count += 1
     
     def make_narration(self):
         if self.overwrite == False:
             return None
         if self.narrator == 'dctts':
-            #check if narration already exists
+            # check if narration already exists
             if len(os.listdir(self.dctts_out)) > 0 and self.overwrite == False:
                 print('Not going to make narration')
             else:
-                # dctts_synthesize()
+                dctts_synthesize()
                 self.combine_wavs()
         else:
             for sd in self.script:
                 prefix = str(self.auddir / sd['title'])
+                # Create header speech
                 self.google_tts(string=sd['title'], 
                                 mp3path=prefix + '_header.mp3')
+                # If further text is contained in section
                 if sd['text']:
                     self.google_tts(string=sd['text'],
                                    mp3path=prefix + '_text.mp3')
-
-                             
+                
     def clean_text(self, text):
         """
         Remove stop words
@@ -164,15 +177,13 @@ class WikiMovie():
                                     'text': self.clean_text(s.text)})
                 # recursion to next level. Once lowest level is reached, next main section will be accessed
                 self.flush_sections(s.sections, level+1)
-    
-                             
+                     
     def get_keywords(self):
         self.keywords += [sd['title'] for sd in self.script[1:] if sd['text']]
 
-
     def output_text(self):
         """
-        Process page text for DC_TTS creation. Write to file. 
+        Process page text for DC_TTS creation. Writes to a text file. 
         """
         self.sent_path = self.dctts_in / f"{self.title}.txt"
         hp.test_data = self.sent_path
@@ -193,7 +204,7 @@ class WikiMovie():
                     if not sent:
                         continue
                     if len(sent) > hp.max_N:
-                        print('splitting')
+                        # print('splitting line')
                         split_on = sent[:hp.max_N].rfind(" ")
                         tmp_split = [sent[:split_on], sent[split_on:]]
                         while len(tmp_split[-1]) > hp.max_N:
@@ -208,8 +219,7 @@ class WikiMovie():
                 pre = sd['title'].replace(" ", "")
                 for i, sent in enumerate(sents): 
                     sf.write(f"{pre}:{i} {sent}\n")
-    
-                             
+                          
     def combine_wavs(self):
         """For use with dctts synthesize"""
         ct = 1
@@ -235,9 +245,10 @@ class WikiMovie():
                              
     def create_clip(self, sd):
         """
-        Load back audio and attach it to proper clip
+        Load back audio and attach it to proper clip.
+
         Args: 
-            sd (dict): A dictionary as found in self.script
+            sd (dict) -- A dictionary as found in self.script
         Returns:
             V (VideoClip): Combined TextClip and (optional) ImageSequence
         """
@@ -266,10 +277,10 @@ class WikiMovie():
                              
     def make_movie(self, hp, cutoff=None):
         """
+        Creates and saves movie.
+
         Args:
-            cutoff (int): Limit the length of the script. Used like script[:cutoff]
-        Returns:
-            None
+        cutoff (int) -- Limit the length of the script. Used like script[:cutoff]
         """
         print("Video Title: ", self.title)
         self.cutoff = cutoff
@@ -277,14 +288,16 @@ class WikiMovie():
         
         self.flush_sections(self.page.sections)
         
-        self.output_text()
-        hp.test_data = str(WMM.sent_path)
-        hp.sampledir = str(WMM.dctts_out) 
-        print("mmtest",hp.test_data)
+        if self.narrator == 'dctts':
+            self.output_text()
+            hp.test_data = str(WMM.sent_path)
+            hp.sampledir = str(WMM.dctts_out) 
+            print("test data: " + hp.test_data)
+        
         # Download and resize images
         self.get_keywords()
-        # master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
-        #                 url_dir=self.url_dir, img_dir=self.imgdir, num_requested=20)
+        master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
+                        url_dir=self.url_dir, img_dir=self.imgdir, num_requested=20)
         self.process_images()
         print('\n') 
         
@@ -295,12 +308,12 @@ class WikiMovie():
         self.cliplist = [self.create_clip(sd) for sd in self.script]
                              
         thanks = TextClip("Thanks for watching \n and listening",
-                            color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
-                            set_duration(2)
+                        color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
+                        set_duration(2)
 
         subscribe = TextClip("Please Subscribe!",
-                                color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
-                                set_duration(2)
+                            color='white', fontsize=72, size=VIDEO_SIZE, method='caption').\
+                            set_duration(2)
 
         self.video = concatenate_videoclips(self.cliplist + [thanks, subscribe],
                                             method='compose').\
@@ -322,6 +335,6 @@ class WikiMovie():
 if __name__ == "__main__":
     wiki = wikipediaapi.Wikipedia('en')
     # page = wiki.page(input("What would you like the video to be about? "))
-    page = wiki.page("WWE SmackDown")
-    WMM = WikiMovie(page, narrator='dctts', overwrite=True)
+    page = wiki.page("graph paper")
+    WMM = WikiMovie(page, narrator='gtts', overwrite=True)
     WMM.make_movie(cutoff=None, hp=hp)
