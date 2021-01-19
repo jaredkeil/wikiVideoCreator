@@ -1,5 +1,17 @@
+# Ignore model
+LJ_logdir/
+*model_gs_724k.data-00000-of-00001
+
+# Ignore media files
+*.wav
+*.mp3
+*.mp4
+
 # Ignoring Images Directory
 *.jpg
+*.png
+images/
+url_files/
 
 #Ignore virtual Environment
 youtube_upload/
