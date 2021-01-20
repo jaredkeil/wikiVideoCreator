@@ -184,7 +184,7 @@ def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
         if not os.path.exists(sk_img_dir):
             os.makedirs(sk_img_dir)
 
-        print("starting download of images inside directory {s_keyword}") # Terminal message
+        print(f"starting download of images inside directory {s_keyword}") # Terminal message
         
         count = 0 # Used as the name the image title when saved
         headers = {} # Used by selenium 
@@ -199,13 +199,13 @@ def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
                 try:
                     o = urlparse(link)
                     ref = o.scheme + '://' + o.hostname
-                    #ref = 'https://www.google.com'
+                    # ex. ref = 'https://www.google.com'
                     ua = generate_user_agent()
                     headers['User-Agent'] = ua
                     headers['referer'] = ref
                     # print(f'\n{link.strip()}\n{ref}\n{ua}')
                     req = urllib.request.Request(link.strip(), headers = headers)
-                    response = urllib.request.urlopen(req)
+                    response = urllib.request.urlopen(req, timeout=10)
                     data = response.read()
                     file_path = sk_img_dir / f'{count}.jpg'
                     with file_path.open('wb') as wf:
@@ -213,7 +213,7 @@ def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
                     # print(f'Process-{main_keyword} download image {main_keyword}/{count}.jpg')
                     count += 1
                     if count % 10 == 0:
-                        #print(f'Process-{main_keyword} is sleeping')
+                        print(f'Process-{main_keyword} is sleeping, on image {count}')
                         time.sleep(5)
 
                 except urllib.error.URLError as e:
