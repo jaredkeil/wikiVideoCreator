@@ -181,30 +181,35 @@ class WikiMovie():
     def get_keywords(self):
         self.keywords += [sd['title'] for sd in self.script[1:] if sd['text']]
 
-    def output_text(self):
+    def process_text_dctts(self):
         """
-        Process page text for DC_TTS creation. Writes to a text file. 
+        Process article text into lines of pre-defined character limit of DC_TTS model.
+        Uses the model's hyperparameter hp.max_N . . . currently at 180
         """
         self.sent_path = self.dctts_in / f"{self.title}.txt"
         hp.test_data = self.sent_path
         
         with self.sent_path.open('w') as sf:
             sf.write(f"Script for Wikipedia article {self.title}\n")
-            # Section by section
-            # sd = section_dict
             sample_ct = 0
+
+            # iterate over self.script(list of 'section' dictionaries)
             for sd in self.script:
-                # d = {'title': section title, 'level': level, 'text': section text}
-                # Full length sentences, possibly greater than max number of characters for model
-                full_sents = [sd['title']] + sd['text'].split('.')
+                # reminder of dictionary format:
+                # sd = {'title': section title, 'level': level, 'text': section text}
+
+                # Full length sentences, possibly greater than max number of characters for model.
+                # Split simply on period. Problematic for titles like Dr. and abbreviations like T.M.Z
+                full_sents = [sd['title']] + sd['text'].split('.') 
+                
                 # break section down into max 180 character chunks 
                 sents = []
                 for sent in (full_sents):
                     sent = sent.strip()
                     if not sent:
                         continue
+                    # if the sentence is longer than <hp.max_n> . . . currently set for 180
                     if len(sent) > hp.max_N:
-                        # print('splitting line')
                         split_on = sent[:hp.max_N].rfind(" ")
                         tmp_split = [sent[:split_on], sent[split_on:]]
                         while len(tmp_split[-1]) > hp.max_N:
@@ -289,7 +294,7 @@ class WikiMovie():
         self.flush_sections(self.page.sections)
         
         if self.narrator == 'dctts':
-            self.output_text()
+            self.process_text_dctts()
             hp.test_data = str(WMM.sent_path)
             hp.sampledir = str(WMM.dctts_out) 
             print("test data: " + hp.test_data)
