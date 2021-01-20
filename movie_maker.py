@@ -340,6 +340,6 @@ class WikiMovie():
 if __name__ == "__main__":
     wiki = wikipediaapi.Wikipedia('en')
     # page = wiki.page(input("What would you like the video to be about? "))
-    page = wiki.page("graph paper")
+    page = wiki.page("Condyle")
     WMM = WikiMovie(page, narrator='gtts', overwrite=True)
-    WMM.make_movie(cutoff=None, hp=hp)
+    WMM.make_movie(cutoff=None, hp=hp)  #hp parameter is really only necessary with dctts
