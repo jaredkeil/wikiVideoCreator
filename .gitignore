@@ -13,8 +13,9 @@ LJ_logdir/
 images/
 url_files/
 
-#Ignore virtual Environment
+# Ignore virtual Environments
 youtube_upload/
+env/
 
 # Ignore access files
 *oauth-2.json
