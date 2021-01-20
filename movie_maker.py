@@ -69,10 +69,7 @@ class WikiMovie():
         # audio directories
         self.parent_audio = self.p / 'audio'
         self.auddir = self.p / 'audio' / self.title
-        # dc_tts directory
-        self.dctts_dir = self.p / 'dc_tts'
-        self.dctts_in = self.dctts_dir / 'text_input'
-        self.dctts_out = self.dctts_dir / 'samples' / self.title
+
         # URL lists text files directory
         self.url_dir = self.p / 'url_files'
         # Video directory (all article videos stored in folder, files named by title)
@@ -80,9 +77,19 @@ class WikiMovie():
         # Video save path
         self.vidpath = self.viddir / (self.title + ".mp4")
 
+        to_create = [self.parent_images, self.imgdir, self.resizedir, self.parent_audio, self.auddir,\
+                self.url_dir, self.viddir]
+
+        if self.narrator == 'dctts':
+            # dc_tts directory
+            self.dctts_dir = self.p / 'dc_tts'
+            self.dctts_in = self.dctts_dir / 'text_input'
+            self.dctts_samples = self.dctts_dir / 'samples'
+            self.dctts_out = self.dctts_dir / 'samples' / self.title
+            to_create += [self.dctts_dir, self.dctts_in, self.dctts_samples, self.dctts_out]
+
         print('creating paths...')
-        for d in [self.imgdir, self.resizedir, self.parent_audio, self.auddir, self.dctts_dir,\
-                self.dctts_in, self.dctts_out, self.url_dir, self.viddir]:
+        for d in to_create:
             if not d.exists():
                 d.mkdir()
                 print(d, "directory created")
@@ -96,11 +103,6 @@ class WikiMovie():
         fnames =  [x.parts[-1] for x in contents if x.is_file() and x.parts[-1][0] != '.']
         n_imgs = len(fnames)
         sd['idd'] = [IMG_DISPLAY_DURATION for _ in fnames]
-        
-        # resizedir = sk_imgdir / 'resize'
-        # if not resizedir.exists():
-        #     resizedir.mkdir()
-        #     print(f'made directory {resizedir}')
         
         sd['imgpaths'] = [] #image paths
         for i, fname in enumerate(fnames, start=1):
