@@ -37,7 +37,8 @@ def upload_to_youtube(movie):
             f'--description={movie.page.summary}',
             f'--keywords=',
             '--category=27',
-            '--privacyStatus=public']
+            '--privacyStatus=public',
+            '--noauth_local_webserver']
     print(arglist)
     subprocess.run(arglist)
 
