@@ -1,7 +1,14 @@
 from pathlib import Path
 import os
+import sys
 import wikipediaapi
-from moviepy.editor import *
+
+from moviepy.video.VideoClip import TextClip
+from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
+from moviepy.audio.io.AudioFileClip import AudioFileClip
+import moviepy.video.fx.all as vfx
+from moviepy.video.compositing.concatenate import concatenate_videoclips
+
 import gizeh as gz
 from gtts import gTTS
 from pydub import AudioSegment
@@ -9,8 +16,8 @@ from pydub import AudioSegment
 import time
 from datetime import datetime
 
-from image_downloader import master_download
-from im_funcs import maxsize_pad
+import image_downloader
+import im_funcs
 from synthesize import synthesize as dctts_synthesize
 from hyperparams import Hyperparams as hp
 
@@ -22,13 +29,13 @@ BLACK_GIZEH = (0, 0, 0)
 
 VIDEO_SIZE = (1920, 1080)
 IMG_SHAPE = (1080, 1920)
-IMG_DISPLAY_DURATION = 4    #duration, in seconds, to display each image
+IMG_DISPLAY_DURATION = 4 # duration in seconds to display each image
 
 excluded_sections = {'See also', 'References', 'Further reading', 'External links',
                 'Formats and track listings', 'Credits and personnel', 'Charts',
                 'Certifications', 'Release history'}
 
-stops = {'\n', '\t', 'e.g.', '[sic]', '[...]', 'i.e.',}
+stops = {'\n', '\t', 'e.g.', '[sic]', '[...]', 'i.e.',} # strings to remove from article text 
 
 
 class WikiMovie():
@@ -66,12 +73,14 @@ class WikiMovie():
         self.parent_images = self.p / 'images'
         self.imgdir = self.p / 'images'/ self.title
         self.resizedir = self.imgdir / 'resize'
+
         # audio directories
         self.parent_audio = self.p / 'audio'
         self.auddir = self.p / 'audio' / self.title
 
         # URL lists text files directory
         self.url_dir = self.p / 'url_files'
+
         # Video directory (all article videos stored in folder, files named by title)
         self.viddir = self.p / 'videos'
         # Video save path
@@ -81,7 +90,6 @@ class WikiMovie():
                 self.url_dir, self.viddir]
 
         if self.narrator == 'dctts':
-            # dc_tts directory
             self.dctts_dir = self.p / 'dc_tts'
             self.dctts_in = self.dctts_dir / 'text_input'
             self.dctts_samples = self.dctts_dir / 'samples'
@@ -102,7 +110,7 @@ class WikiMovie():
         contents = sk_imgdir.glob('*') 
         fnames =  [x.parts[-1] for x in contents if x.is_file() and x.parts[-1][0] != '.']
         n_imgs = len(fnames)
-        sd['idd'] = [IMG_DISPLAY_DURATION for _ in fnames]
+        sd['idd'] = [IMG_DISPLAY_DURATION for _ in fnames] # generate list of constant durations
         
         sd['imgpaths'] = [] #image paths
         for i, fname in enumerate(fnames, start=1):
@@ -112,7 +120,7 @@ class WikiMovie():
             path = str(sk_imgdir / fname)
             save_path = str(self.resizedir / fname)
             try:
-                maxsize_pad(path, save_path)
+                im_funcs.maxsize_pad(path, save_path)
             except Exception:
                 print(f'error saving resized image: {fname}')
                 continue
@@ -167,7 +175,7 @@ class WikiMovie():
 
     def flush_sections(self, sections, level=0):
         """
-        Get text from all levels (sections, subsections) in page order and generate narrations
+        Recurse through text under all levels (sections, subsections) in page order, and clean the  text.
         """
         for s in sections:
             if s.title in excluded_sections:
@@ -228,16 +236,18 @@ class WikiMovie():
                     sf.write(f"{pre}:{i} {sent}\n")
                           
     def combine_wavs(self):
-        """For use with dctts synthesize"""
-        ct = 1
+        """
+        Combine the small audio chunks outputted by dc-tts into longer files, converted to mp3.
+        """
+        ct = 1 # used in wav filenames, ex: 1.wav, 2.wav, 3.wav, etc.
         for sd in self.script:
-            # convert title speech to mp3
+            # convert section title to mp3
             print(sd['title'])
             AS_title = AudioSegment.from_wav(str(self.dctts_out / str(ct)) + '.wav')
-            path = str(self.auddir / (sd['title'] + '_header.mp3'))
+            path = str(self.auddir / (sd['title'] + '_header.mp3')) #  / audio / {article title} / {section title}_header.mp3}
             AS_title.export(path, format='mp3')
+
             # combine rest of speech, convert to mp3                               
-            
             n = sd['n_segments']
             print(n, "segments")
             if sd['title'] in self.keywords or sd['level'] == 0:
@@ -257,7 +267,7 @@ class WikiMovie():
         Args: 
             sd (dict) -- A dictionary as found in self.script
         Returns:
-            V (VideoClip): Combined TextClip and (optional) ImageSequence
+            V (VideoClip) -- Combined TextClip and (optional) ImageSequence
         """
         prefix = str(self.auddir / sd['title'])
         ACH = AudioFileClip(prefix + '_header.mp3').set_fps(1)
@@ -271,8 +281,7 @@ class WikiMovie():
             ACT = AudioFileClip(prefix + '_text.mp3').set_fps(1)
             print(sd['imgpaths'])   
             print(sd['idd'])              
-            IS = ImageSequenceClip(sequence=sd['imgpaths'],
-                                 durations=sd['idd'], load_images=True).\
+            IS = ImageSequenceClip(sequence=sd['imgpaths'], durations=sd['idd'], load_images=True).\
                             set_position(('center', 400)).\
                             fx(vfx.loop, duration=ACT.duration).\
                             set_audio(ACT)
@@ -282,11 +291,12 @@ class WikiMovie():
         return V
 
                              
-    def make_movie(self, hp, cutoff=None):
+    def make_movie(self, hp=hp, cutoff=None):
         """
         Creates and saves movie.
 
         Args:
+        hp (Hyperparams) -- Hyperparams object with attributes test_data, max_N, 
         cutoff (int) -- Limit the length of the script. Used like script[:cutoff]
         """
         print("Video Title: ", self.title)
@@ -303,15 +313,16 @@ class WikiMovie():
         
         # Download and resize images
         self.get_keywords()
-        master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
+        image_downloader.master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
                         url_dir=self.url_dir, img_dir=self.imgdir, num_requested=20)
         self.process_images()
         print('\n') 
         
+        print('Creating audio. . . ')
         self.make_narration()
-        print('creating audio')               
+        
         # Create Video Clips
-        print("Creating clips. . .")
+        print("Creating video clips. . .")
         self.cliplist = [self.create_clip(sd) for sd in self.script]
                              
         thanks = TextClip("Thanks for watching \n and listening",
