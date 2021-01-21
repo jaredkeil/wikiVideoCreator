@@ -29,6 +29,7 @@ import wikipediaapi
 from multiprocessing import Pool
 from user_agent import generate_user_agent
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 
 def file_len(fname):
@@ -69,7 +70,9 @@ def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested 
     p = Path(os.getcwd())
     mk_url_dir = url_dir / main_keyword
 
-    driver = webdriver.Firefox()
+    options = Options()
+    options.headless = True
+    driver = webdriver.Firefox(options=options)
     for ind, keyword in enumerate(supplemented_keywords):
         img_urls = set()
         search_query = quote(main_keyword + ' ' + keyword)
