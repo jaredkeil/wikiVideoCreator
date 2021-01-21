@@ -94,7 +94,6 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--delete_all', action='store_true', help='delete assets after movie is made')
     parser.add_argument('-n', '--n_pages', type=int, default=25, help='how many pages to include when processing multiple pages')
     parser.add_argument('-c', '--cutoff', type=int,  help='number of characters to include from each section')
+    
     opt = parser.parse_args()
-
-    print(opt)
     main(opt)
