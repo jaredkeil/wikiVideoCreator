@@ -3,6 +3,9 @@
 
 ### Installation:
 
+Install Selenium, geckodriver, firefox:
+ - etc...
+
 Install [ImageMagick](https://imagemagick.org/script/download.php), and [Ghostscript](https://www.ghostscript.com/doc/9.53.3/Install.htm)
     
 - method depends on operating system (Linux, macOS, Windows)
