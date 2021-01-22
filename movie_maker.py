@@ -10,7 +10,7 @@ import moviepy.video.fx.all as vfx
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 
 import gizeh as gz
-from gtts import gTTS
+from gtts import gTTS, gTTSError
 from pydub import AudioSegment
 
 import time
@@ -139,10 +139,19 @@ class WikiMovie():
             try:
                 tts.save(mp3path)
                 break
+            
             except Exception as e:
                 print(e)
                 print(f'gTTS save error, trying again. Error count: {error_count}')
                 error_count += 1
+
+                # rsp should be <requests.Response>
+                if isinstance(e, gTTSError) and e.rsp: 
+                    if e.rsp.status_code == 429:
+                        # too many requests, sleep
+                        time.sleep(60)
+
+
     
     def make_narration(self):
         if self.overwrite == False:
