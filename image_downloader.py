@@ -215,9 +215,9 @@ def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
                         wf.write(data)
                     # print(f'Process-{main_keyword} download image {main_keyword}/{count}.jpg')
                     count += 1
-                    if count % 10 == 0:
-                        print(f'Process-{main_keyword} is sleeping, on image {count}')
-                        time.sleep(5)
+                    # if count % 10 == 0:
+                    #     print(f'Process-{main_keyword} is sleeping, on image {count}')
+                    #     time.sleep(5)
 
                 except urllib.error.URLError as e:
                     print('URLError')
