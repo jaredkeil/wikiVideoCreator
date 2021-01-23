@@ -50,7 +50,7 @@ class WikiMovie():
     Initialize with 'page' object from wikipedia Python module.
     Primary function is make_movie().
     """
-    def __init__(self, page, narrator='gtts', overwrite=False):
+    def __init__(self, page, narrator='gtts', overwrite=True):
         """
         Args:
         page (wikipediaapi.WikipediaPage) -- Specific page object used to make movie.
@@ -216,12 +216,10 @@ class WikiMovie():
     
     
     def make_narration(self):
-        if self.overwrite == False:
-            return None
         
         if self.narrator == 'dctts':
             # check if narration already exists
-            if len(os.listdir(self.dctts_out)) > 0 and self.overwrite == False:
+            if len(os.listdir(self.dctts_out)) > 0 and not self.overwrite:
                 print('Not going to make narration')
             else:
                 dctts_synthesize()
@@ -281,7 +279,7 @@ class WikiMovie():
             print(sd['title'])
             AS_title = AudioSegment.from_wav(str(self.dctts_out / (str(ct) + '.wav')))
             path = str(self.auddir / (sd['title'] + '_header.mp3')) #  / audio / {article title} / {section title}_header.mp3}
-            AS_title.export(path, format='mp3')
+            AS_title.export(path, format='mp3', codec='libmp3lame')
 
             # combine rest of speech, convert to mp3                               
             n = sd['n_segments']
@@ -291,7 +289,7 @@ class WikiMovie():
                 for i in range(ct+2, ct+n):
                     AS_text += AudioSegment.from_wav(str(self.dctts_out / (str(i) + '.wav')))
                 path = str(self.auddir / (sd['title'] + '_text.mp3'))
-                AS_text.export(path, format='mp3')
+                AS_text.export(path, format='mp3', codec='libmp3lame')
 
             ct += n
              
@@ -350,7 +348,7 @@ class WikiMovie():
         # Download and resize images
         self.get_keywords()
         image_downloader.master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
-                        url_dir=self.url_dir, img_dir=self.imgdir, num_requested=20)
+                        url_dir=self.url_dir, img_dir=self.imgdir, num_requested=5)
         self.process_images()
         print('\n') 
         
