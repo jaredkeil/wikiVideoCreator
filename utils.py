@@ -9,9 +9,9 @@ from __future__ import print_function, division
 import numpy as np
 import librosa
 import os, copy
-import matplotlib
-matplotlib.use('pdf')
-import matplotlib.pyplot as plt
+# import matplotlib
+# matplotlib.use('pdf')
+# import matplotlib.pyplot as plt
 from scipy import signal
 
 from hyperparams import Hyperparams as hp

@@ -1,6 +1,8 @@
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
+import argparse
+
 import wikipediaapi
 
 from moviepy.video.VideoClip import TextClip
@@ -8,9 +10,12 @@ from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 import moviepy.video.fx.all as vfx
 from moviepy.video.compositing.concatenate import concatenate_videoclips
+# import gizeh as gz
 
-import gizeh as gz
-from gtts import gTTS, gTTSError
+# from gtts import gTTS, gTTSError
+
+import pyttsx3
+
 from pydub import AudioSegment
 
 import time
@@ -53,9 +58,11 @@ class WikiMovie():
         overwrite (bool) -- Overwrite audio (default True) 
         """
         self.page = page
-        self.title = self.page._attributes['title']
         self.narrator = narrator
+        self._validate_narrator()
         self.overwrite = overwrite
+
+        self.title = self.page._attributes['title']
         self.script = [{'title': page.title, 
                         'level': 0, 
                         'text': self.clean_text(page.summary)}]
@@ -66,7 +73,12 @@ class WikiMovie():
         # self.p = Path(os.path.abspath('')).resolve() ## For jupyter notebook
         self._imgidx = 0 # For starting image seqeunces on unique image
         self.cutoff = None
-        
+    
+    def _validate_narrator(self):
+        if self.narrator not in {'gtts', 'pytts', 'dctts'}:
+            raise NotImplementedError
+        if self.narrator == 'pytts':
+            self.engine = pyttsx3.init()
 
     def create_paths(self):
         # Image directories
@@ -103,77 +115,7 @@ class WikiMovie():
                 print(d, "directory created")
             elif d.exists():
                 print(d, "exists")
-
-    def resize_images(self, sd):
-        
-        sk_imgdir = self.imgdir / sd['title'] # supplemented keyword used earlier by image search/download
-        contents = sk_imgdir.glob('*') 
-        fnames =  [x.parts[-1] for x in contents if x.is_file() and x.parts[-1][0] != '.']
-        n_imgs = len(fnames)
-        sd['idd'] = [IMG_DISPLAY_DURATION for _ in fnames] # generate list of constant durations
-        
-        sd['imgpaths'] = [] #image paths
-        for i, fname in enumerate(fnames, start=1):
-            sys.stdout.write(f"Resizing {sd['title']} Images [{'#'*(i) + ' '*(n_imgs - i)}]   \r")
-            sys.stdout.flush()
-            
-            path = str(sk_imgdir / fname)
-            save_path = str(self.resizedir / fname)
-            try:
-                im_funcs.maxsize_pad(path, save_path)
-            except Exception:
-                print(f'error saving resized image: {fname}')
-                continue
-            sd['imgpaths'].append(save_path)
-        print('\ndone')
-                         
-    def process_images(self):
-        for sd in self.script:
-            if sd['title'] in self.keywords or sd['level'] == 0:
-                self.resize_images(sd)
     
-    def google_tts(self, string, mp3path):
-        error_count = 0
-        tts = gTTS(string)
-        while True:
-            try:
-                tts.save(mp3path)
-                break
-            
-            except Exception as e:
-                print(e)
-                print(f'gTTS save error, trying again. Error count: {error_count}')
-                error_count += 1
-
-                # rsp should be <requests.Response>
-                if isinstance(e, gTTSError) and e.rsp: 
-                    if e.rsp.status_code == 429:
-                        # too many requests, sleep
-                        time.sleep(60)
-
-
-    
-    def make_narration(self):
-        if self.overwrite == False:
-            return None
-        if self.narrator == 'dctts':
-            # check if narration already exists
-            if len(os.listdir(self.dctts_out)) > 0 and self.overwrite == False:
-                print('Not going to make narration')
-            else:
-                dctts_synthesize()
-                self.combine_wavs()
-        else:
-            for sd in self.script:
-                prefix = str(self.auddir / sd['title'])
-                # Create header speech
-                self.google_tts(string=sd['title'], 
-                                mp3path=prefix + '_header.mp3')
-                # If further text is contained in section
-                if sd['text']:
-                    self.google_tts(string=sd['text'],
-                                   mp3path=prefix + '_text.mp3')
-                
     def clean_text(self, text):
         """
         Remove stop words
@@ -196,9 +138,6 @@ class WikiMovie():
                                     'text': self.clean_text(s.text)})
                 # recursion to next level. Once lowest level is reached, next main section will be accessed
                 self.flush_sections(s.sections, level+1)
-                     
-    def get_keywords(self):
-        self.keywords += [sd['title'] for sd in self.script[1:] if sd['text']]
 
     def process_text_dctts(self):
         """
@@ -243,6 +182,94 @@ class WikiMovie():
                 pre = sd['title'].replace(" ", "")
                 for i, sent in enumerate(sents): 
                     sf.write(f"{pre}:{i} {sent}\n")
+                     
+    def get_keywords(self):
+        self.keywords += [sd['title'] for sd in self.script[1:] if sd['text']]
+
+    def process_images(self):
+        for sd in self.script:
+            if sd['title'] in self.keywords or sd['level'] == 0:
+                self.resize_images(sd)
+    
+    def resize_images(self, sd):
+        
+        sk_imgdir = self.imgdir / sd['title'] # supplemented keyword used earlier by image search/download
+        contents = sk_imgdir.glob('*') 
+        fnames =  [x.parts[-1] for x in contents if x.is_file() and x.parts[-1][0] != '.']
+        n_imgs = len(fnames)
+        sd['idd'] = [IMG_DISPLAY_DURATION for _ in fnames] # generate list of constant durations
+        
+        sd['imgpaths'] = [] #image paths
+        for i, fname in enumerate(fnames, start=1):
+            sys.stdout.write(f"Resizing {sd['title']} Images [{'#'*(i) + ' '*(n_imgs - i)}]   \r")
+            sys.stdout.flush()
+            
+            path = str(sk_imgdir / fname)
+            save_path = str(self.resizedir / fname)
+            try:
+                im_funcs.maxsize_pad(path, save_path)
+            except Exception:
+                print(f'error saving resized image: {fname}')
+                continue
+            sd['imgpaths'].append(save_path)
+        print('\ndone')
+    
+    
+    def make_narration(self):
+        if self.overwrite == False:
+            return None
+        
+        if self.narrator == 'dctts':
+            # check if narration already exists
+            if len(os.listdir(self.dctts_out)) > 0 and self.overwrite == False:
+                print('Not going to make narration')
+            else:
+                dctts_synthesize()
+                self.combine_wavs()
+        
+        elif self.narrator == 'gtts':
+            for sd in self.script:
+                prefix = str(self.auddir / sd['title'])
+                # Create header speech
+                self.google_tts(string=sd['title'], mp3path=prefix + '_header.mp3')
+                # If further text is contained in section
+                if sd['text']:
+                    self.google_tts(string=sd['text'], mp3path=prefix + '_text.mp3')
+
+        elif self.narrator == 'pytts':
+            for sd in self.script:
+                prefix = str(self.auddir / sd['title'])
+
+                self.pytts(string=sd['title'], aiffpath=prefix + '_header.mp3')
+
+                if sd['text']:
+                    self.pytts(string=sd['text'], aiffpath=prefix + '_text.mp3')
+                
+    def google_tts(self, string, mp3path):
+        error_count = 0
+        tts = gTTS(string)
+        while True:
+            try:
+                tts.save(mp3path)
+                print('gtts success')
+                break
+            
+            except Exception as e:
+                print(e)
+                print(f'gTTS save error, trying again. Error count: {error_count}')
+                error_count += 1
+
+                # rsp should be <requests.Response>
+                if isinstance(e, gTTSError) and e.rsp: 
+                    if e.rsp.status_code == 429:
+                        # too many requests, sleep
+                        time.sleep(60)
+
+    def pytts(self, string, aiffpath):
+
+        self.engine.save_to_file(string, aiffpath)
+        self.engine.runAndWait()
+
                           
     def combine_wavs(self):
         """
@@ -300,7 +327,7 @@ class WikiMovie():
         return V
 
                              
-    def make_movie(self, hp=hp, cutoff=None):
+    def make_movie(self, hp=None, cutoff=None):
         """
         Creates and saves movie.
 
@@ -316,8 +343,8 @@ class WikiMovie():
         
         if self.narrator == 'dctts':
             self.process_text_dctts()
-            hp.test_data = str(WMM.sent_path)
-            hp.sampledir = str(WMM.dctts_out) 
+            hp.test_data = str(self.sent_path)
+            hp.sampledir = str(self.dctts_out) 
             print("test data: " + hp.test_data)
         
         # Download and resize images
@@ -360,8 +387,23 @@ class WikiMovie():
         
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="""Make movie from wikipedia article.
+                                    Usage: python test_upload.py <filepath>""")
+    parser.add_argument('name', default=None, nargs='+')
+    opt = parser.parse_args()
+
+    if not opt.name:
+        name = 'Condyle'
+    else:
+        name = ' '.join(opt.name)
+
     wiki = wikipediaapi.Wikipedia('en')
-    # page = wiki.page(input("What would you like the video to be about? "))
-    page = wiki.page("Condyle")
-    WMM = WikiMovie(page, narrator='gtts', overwrite=True)
+
+    # User input
+    # requested_name = input("What would you like the video to be about? ")
+    # page = wiki.page(requested_name)
+    
+    page = wiki.page(name)
+    WMM = WikiMovie(page, narrator='dctts', overwrite=True)
     WMM.make_movie(cutoff=None, hp=hp)  #hp parameter is really only necessary with dctts
