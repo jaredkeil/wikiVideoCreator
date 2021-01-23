@@ -279,7 +279,7 @@ class WikiMovie():
         for sd in self.script:
             # convert section title to mp3
             print(sd['title'])
-            AS_title = AudioSegment.from_wav(str(self.dctts_out / (str(ct)) + '.wav'))
+            AS_title = AudioSegment.from_wav(str(self.dctts_out / (str(ct) + '.wav'))
             path = str(self.auddir / (sd['title'] + '_header.mp3')) #  / audio / {article title} / {section title}_header.mp3}
             AS_title.export(path, format='mp3')
 
@@ -287,9 +287,9 @@ class WikiMovie():
             n = sd['n_segments']
             print(n, "segments")
             if sd['title'] in self.keywords or sd['level'] == 0:
-                AS_text = AudioSegment.from_wav(str(self.dctts_out / (str(ct+1)) + '.wav'))
+                AS_text = AudioSegment.from_wav(str(self.dctts_out / (str(ct+1) + '.wav'))
                 for i in range(ct+2, ct+n):
-                    AS_text += AudioSegment.from_wav(str(self.dctts_out / (str(i)) + '.wav'))
+                    AS_text += AudioSegment.from_wav(str(self.dctts_out / (str(i) + '.wav'))
                 path = str(self.auddir / (sd['title'] + '_text.mp3'))
                 AS_text.export(path, format='mp3')
 
