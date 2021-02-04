@@ -16,7 +16,9 @@ url_files/
 # Ignore virtual Environments
 youtube_upload/
 env/
-.vscode/
+*/bin/
+*.vscode/
+*.idea/
 
 # Ignore access files
 *oauth-2.json
