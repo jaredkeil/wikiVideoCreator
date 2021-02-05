@@ -17,14 +17,12 @@
 import os
 from pathlib import Path
 import sys
-import json
 import time
-from math import ceil
+import math
 import logging
 import urllib.request
 import urllib.error
 from urllib.parse import urlparse, quote
-import wikipediaapi
 
 from multiprocessing import Pool
 from user_agent import generate_user_agent
@@ -32,26 +30,28 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 
+
 def file_len(fname):
     with open(fname) as f:
         for i, l in enumerate(f):
             pass
-    return i + 1 # I will be the index of the last line. 1 is added to account for the folder of resized images.
+    return i + 1  # i will be the index of the last line. 1 is added to account for the folder of resized images.
 
-def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested = 20, connection_speed = "medium"):
+
+def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested=20, connection_speed="medium"):
     """get image links with selenium
     
     Args:
         main_keyword (str): main keyword
-        url_dir (Path): 
         supplemented_keywords (list[str]): list of supplemented keywords
-        link_file_path (str): path of the file to store the links
+        url_dir (Path):
         num_requested (int, optional): maximum number of images to download
+        connection_speed (str, optional): 'very slow', 'slow', 'medium', 'fast', or 'very fast'
     
     Returns:
-        list of url link_file_paths (Path): # still need to integrate 
+        None
     """
-    number_of_scrolls = ceil(num_requested/700) #Set number of times to scroll
+    number_of_scrolls = math.ceil(num_requested / 700)  # Set number of times to scroll
     # 700 is currently arbitrary. It is an attempt to limit the images loaded.
     
     # Setting the wait time based on the set connection speed
@@ -67,7 +67,6 @@ def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested 
         wait_time = .25
         
     # Set current working directory
-    p = Path(os.getcwd())
     mk_url_dir = url_dir / main_keyword
 
     options = Options()
@@ -100,15 +99,15 @@ def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested 
             sys.stdout.flush() 
             try:
                 thumb.click()
-                time.sleep(wait_time) # This is wait time for the image to load in it's higher resolution so that the URL can be retrieved
-            except e:
+                time.sleep(wait_time)  # This is wait time for the image to load in it's higher resolution so that the URL can be retrieved
+            except:
                 print("Error clicking one thumbnail")
 
             url_elements = driver.find_elements_by_xpath('//img[@class="n3VNCb"]')
             for url_element in url_elements:
                 try:
                     url = url_element.get_attribute('src')
-                except e:
+                except:
                     print("Error getting one url")
 
                 if url.startswith('http') and not url.startswith('https://encrypted-tbn0.gstatic.com'):
@@ -121,7 +120,7 @@ def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested 
             elif url_dir.exists():
                 print(url_dir, "exists")
             
-            # Create main keyowrd url directory
+            # Create main keyword url directory
             if not mk_url_dir.exists():
                 mk_url_dir.mkdir()
                 print(url_dir, "directory created")
@@ -154,87 +153,73 @@ def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
     
     Args:
         main_keyword (str): main keyword used previously by get_image_links
-        supplemented_keywords lst(str): supplimental keywords used in the previous image search
-        link_file_path (Path): path of directory which contains image URL .txt files
+        supplemented_keywords lst(str): supplemental keywords used in the previous image search
         url_dir (Path): directory where the url.txt files are stored
         img_dir (Path): directory to store the downloaded images
 
     Returns:
         None
     """
-    # Creating paths reletive to this file's location
-    p = Path(__file__).resolve().parents[0]
-    # mk_img_dir = p / img_dir / main_keyword
-
-    
-    # Creating file paths to save images to
 
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
     
     for ind, s_keyword in enumerate(supplemented_keywords):
+        if s_keyword == " ":
+            sk_img_dir = img_dir / main_keyword  # sets the path to the directory on where to save images to
+            link_file_path = url_dir / main_keyword / f"{main_keyword}.txt"  # sets the path to the url file to access
+        else:
+            sk_img_dir = img_dir / s_keyword  # sets the path to the directory on where to save images to
+            link_file_path = url_dir / main_keyword / f"{s_keyword}.txt"  # sets the path to the url file to access
 
-        link_file_path = url_dir / main_keyword / f"{s_keyword}.txt" # sets the path to the url file to access 
-        
-        if s_keyword != " ":
-            sk_img_dir = img_dir / s_keyword # sets the path to the direstory on where to save images to
-            link_file_path = url_dir / main_keyword / f"{s_keyword}.txt" # sets the path to the url file to access 
-        elif s_keyword == " ":
-            sk_img_dir = img_dir / main_keyword # sets the path to the direstory on where to save images to
-            link_file_path = url_dir / main_keyword / f"{main_keyword}.txt" # sets the path to the url file to access 
-
-        # Creates directory to save supplimental keywords to
+        # Create directory to save supplemental keyword images
         if not os.path.exists(sk_img_dir):
             os.makedirs(sk_img_dir)
 
-        print(f"starting download of images inside directory {s_keyword}") # Terminal message
+        print(f"starting download of images inside directory {s_keyword}")  # Terminal message
         
-        count = 0 # Used as the name the image title when saved
-        headers = {} # Used by selenium 
+        count = 0  # Used as the name the image title when saved
+        headers = {}  # Used by selenium
         
         # start to download images
-        
         with link_file_path.open('r') as rf:
             for i, link in enumerate(rf.readlines()):
                 print(link)
                 sys.stdout.write(f"Downloading images [{'#' * (i+1) + ' ' * (file_len(link_file_path) - i -1)}]   \r")
                 sys.stdout.flush() 
                 try:
-                    o = urlparse(link)
-                    ref = o.scheme + '://' + o.hostname
-                    # ex. ref = 'https://www.google.com'
+                    parsed = urlparse(link)
+                    referer = parsed.scheme + '://' + parsed.hostname
+                    # ex. referer = 'https://www.google.com'
                     ua = generate_user_agent()
                     headers['User-Agent'] = ua
-                    headers['referer'] = ref
-                    # print(f'\n{link.strip()}\n{ref}\n{ua}')
-                    req = urllib.request.Request(link.strip(), headers = headers)
+                    headers['referer'] = referer
+                    # print(f'\n{link.strip()}\n{referer}\n{ua}')
+                    req = urllib.request.Request(link.strip(), headers=headers)
                     response = urllib.request.urlopen(req, timeout=10)
-                    data = response.read()
                     file_path = sk_img_dir / f'{count}.jpg'
                     with file_path.open('wb') as wf:
-                        wf.write(data)
+                        wf.write(response.read())
                     # print(f'Process-{main_keyword} download image {main_keyword}/{count}.jpg')
                     count += 1
-                    # if count % 10 == 0:
-                    #     print(f'Process-{main_keyword} is sleeping, on image {count}')
-                    #     time.sleep(5)
 
                 except urllib.error.URLError as e:
                     print('URLError')
-                    logging.error(f'URLError while downloading image {link}reason:{e.reason}')
+                    logging.error(f'URLError while downloading image {link}. Reason:{e.reason}')
                     continue
                 except urllib.error.HTTPError as e:
                     print('HTTPError')
-                    logging.error(f'HTTPError while downloading image {link}http code {e.code}, reason:{e.reason}')
+                    logging.error(f'HTTPError while downloading image {link}. http code {e.code}, reason:{e.reason}')
                     continue
                 except Exception as e:
                     print('Unexpected Error')
-                    logging.error(f'Unexpeted error while downloading image {link}error type:{e.args}')
+                    logging.error(f'Unexpected error while downloading image {link}. error type:{e.args}')
                     continue
             downloaded_num = os.stat(sk_img_dir).st_nlink 
             print(f"\nSuccessfully downloaded {downloaded_num} images")
-                
-def master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_requested = 20, connection_speed = "medium"):
+
+
+def master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_requested=20, connection_speed="medium"):
     """
     Retrieve image URLs and download, in two step process.
 
@@ -245,7 +230,7 @@ def master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_
     Returns:
         None
     """
-    get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested = num_requested, connection_speed = connection_speed)
+    get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested=num_requested, connection_speed=connection_speed)
     download_images(main_keyword, supplemented_keywords, url_dir, img_dir)
 
 
@@ -258,7 +243,4 @@ if __name__ == "__main__":
     url_dir = p / "url_files" 
     img_dir = p / "images" / main_keyword
 
-    
-
-    master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_requested = 5, connection_speed = "medium")
-    
+    master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_requested=5, connection_speed="medium")
