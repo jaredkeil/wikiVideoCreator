@@ -7,14 +7,9 @@ https://www.github.com/kyubyong/dc_tts
 
 from __future__ import print_function
 
-import os
-
-from hyperparams import Hyperparams as hp
-import numpy as np
-import tensorflow as tf
 from train import Graph
 from utils import *
-from data_load import load_data
+from dc_tts.data_load import load_data
 from scipy.io.wavfile import write
 from tqdm import tqdm
 

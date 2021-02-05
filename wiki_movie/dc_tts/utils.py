@@ -14,7 +14,7 @@ import os, copy
 # import matplotlib.pyplot as plt
 from scipy import signal
 
-from hyperparams import Hyperparams as hp
+from dc_tts.hyperparams import Hyperparams as hp
 import tensorflow as tf
 
 def get_spectrograms(fpath):

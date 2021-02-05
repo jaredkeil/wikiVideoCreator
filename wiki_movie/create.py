@@ -12,6 +12,7 @@ from movie_maker import WikiMovie
 # Initialize API
 WikiAPI = wikipediaapi.Wikipedia('en')
 
+
 def get_page_list(url, n_pages):
     table = pd.read_html(url)[2]
     print("Extracting wikipedia pages")

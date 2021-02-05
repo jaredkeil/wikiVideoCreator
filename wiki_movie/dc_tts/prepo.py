@@ -9,7 +9,7 @@ from __future__ import print_function
 
 from utils import load_spectrograms
 import os
-from data_load import load_data
+from dc_tts.data_load import load_data
 import numpy as np
 import tqdm
 
