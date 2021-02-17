@@ -3,18 +3,7 @@ import time
 import os
 
 import pyttsx3
-from wiki_movie.utils import repository_root, make_directory
-
-
-def localtime_filepath(directory, extension):
-    """
-    directory -- Path
-    extension -- str
-
-    return -- str
-    """
-    formatted_current_time = time.strftime('%H.%M.%S', time.localtime())
-    return str(directory / str(formatted_current_time + '.' + extension))
+from wiki_movie.utils import repository_root, make_directory, localtime_filepath
 
 
 class PyttsxTest(TestCase):
