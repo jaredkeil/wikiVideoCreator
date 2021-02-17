@@ -20,7 +20,7 @@ def make_directory(directory):
     if directory.exists():
         print(directory, "exists")
     else:
-        directory.mkdir()
+        directory.mkdir(parents=True)
         print(directory, "directory created")
 
 
