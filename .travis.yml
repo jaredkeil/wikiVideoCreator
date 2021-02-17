@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.9.1"
+addons:
+  homebrew:
+    casks:
+      - firefox
+    packages:
+      - imagemagick
+      - geckodriver
+install:
+  - pip install pipenv pytest
+  - pipenv sync
+script:
+  - pytest
+
