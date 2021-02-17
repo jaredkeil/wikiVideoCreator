@@ -36,7 +36,8 @@ from wiki_movie.utils import write_seq_to_file, make_directory, file_len
 
 
 class ImageDownloader:
-    def __init__(self, main_keyword, supplemented_keywords, url_dir, img_dir, num_requested=10, connection_speed="medium"):
+    def __init__(self, main_keyword, supplemented_keywords, url_dir, img_dir,
+                 num_requested=10, connection_speed="medium", headless = True):
         """
         Args:
             main_keyword (str): main keyword
@@ -53,12 +54,13 @@ class ImageDownloader:
         self.img_dir = img_dir
         self.num_requested = num_requested
         self.wait_time = {'very slow': 7, 'slow': 3, 'medium': 1, 'fast': 0.5, 'very fast': .25}[connection_speed]
+        self.headless = headless
         self.img_urls = set()
         self._boot_driver()
 
     def _boot_driver(self):
         options = Options()
-        options.headless = True
+        options.headless = self.headless
         self.driver = webdriver.Firefox(options=options)
 
     def find_and_download(self):
@@ -157,7 +159,7 @@ class ImageDownloader:
             self._download_image_from_keyword(keyword)
 
             downloaded_num = os.stat(sk_img_dir).st_nlink
-            print(f"\nSuccessfully downloaded {downloaded_num} images")
+            print(f"\nSuccessfully downloaded {downloaded_num} images for keyword '{keyword}'.")
 
     def _download_image_from_keyword(self, keyword):
         print(f"starting download of images inside directory {keyword}")
@@ -167,7 +169,8 @@ class ImageDownloader:
         with link_file_path.open('r') as rf:
             for i, link in enumerate(rf.readlines()):
                 print(link)
-                sys.stdout.write(f"Downloading images [{'#' * (i + 1) + ' ' * (file_len(link_file_path) - i - 1)}]   \r")
+                sys.stdout.write(
+                    f"Downloading images [{'#' * (i + 1) + ' ' * (file_len(link_file_path) - i - 1)}]   \r")
                 sys.stdout.flush()
                 self._get_link(link, keyword)
 
@@ -197,7 +200,3 @@ class ImageDownloader:
         }
         req = urllib.request.Request(url.strip(), headers=headers)
         return urllib.request.urlopen(req, timeout=10)
-
-
-
-
