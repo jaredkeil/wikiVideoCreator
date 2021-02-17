@@ -4,7 +4,7 @@ python:
 addons:
   apt:
     packages:
-      - geckodriver
+      - firefox-geckodriver
 install:
   - "pip install pipenv pytest"
   - "pipenv install"
