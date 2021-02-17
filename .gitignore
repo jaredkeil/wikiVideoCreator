@@ -12,6 +12,7 @@ LJ_logdir/
 *.png
 data/images/
 data/url_files/
+data/audio/
 tests/data/images/*
 tests/data/url_files/python/*
 
