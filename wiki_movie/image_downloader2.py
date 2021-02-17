@@ -28,7 +28,7 @@ from multiprocessing import Pool
 from user_agent import generate_user_agent
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from selenium.common.exceptions import NoSuchElementException, NoSuchAttributeException
+from selenium.common.exceptions import NoSuchElementException, NoSuchAttributeException, ElementNotInteractableException
 from selenium.webdriver.common.keys import Keys
 
 from wiki_movie.google_images_locators import GoogleImagesLocators
@@ -37,7 +37,7 @@ from wiki_movie.utils import write_seq_to_file, make_directory, file_len
 
 class ImageDownloader:
     def __init__(self, main_keyword, supplemented_keywords, url_dir, img_dir,
-                 num_requested=10, connection_speed="medium", headless = True):
+                 num_requested=10, connection_speed="medium", headless=True):
         """
         Args:
             main_keyword (str): main keyword
@@ -101,7 +101,7 @@ class ImageDownloader:
             time.sleep(1)
             try:
                 self.driver.find_element(*GoogleImagesLocators.MORE_RESULTS).click()
-            except NoSuchElementException as e:
+            except ElementNotInteractableException:
                 break
 
     def _get_thumbnails(self):
@@ -119,7 +119,7 @@ class ImageDownloader:
         try:
             thumb.click()
             time.sleep(self.wait_time)
-        except:
+        except ElementNotInteractableException:
             print("Error clicking one thumbnail")
 
         src_urls = set()
@@ -165,12 +165,13 @@ class ImageDownloader:
         print(f"starting download of images inside directory {keyword}")
 
         link_file_path = self._define_link_file_path(keyword)
+        n_links = file_len(link_file_path)
 
         with link_file_path.open('r') as rf:
             for i, link in enumerate(rf.readlines()):
                 print(link)
                 sys.stdout.write(
-                    f"Downloading images [{'#' * (i + 1) + ' ' * (file_len(link_file_path) - i - 1)}]   \r")
+                    f"Downloading images [{'#' * (i + 1) + ' ' * (n_links - i - 1)}]   \r")
                 sys.stdout.flush()
                 self._get_link(link, keyword)
 

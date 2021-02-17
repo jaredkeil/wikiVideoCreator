@@ -25,9 +25,10 @@ def make_directory(directory):
 
 
 def file_len(file_name):
+    i = 0
     with open(file_name) as f:
-        for i, l in enumerate(f):
-            pass
-    return i + 1  # i will be the index of the last line. 1 is added to account for the folder of resized images.
+        for _ in f:
+            i += 1
+    return i  # i will be the index of the last line. 1 is added to account for the folder of resized images.
 
 
