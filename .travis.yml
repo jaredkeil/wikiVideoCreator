@@ -9,7 +9,6 @@ addons:
       - imagemagick
       - geckodriver
 install:
-  - pip install pipenv pytest
-  - pipenv sync
-script:
-  - pytest
+  - "pip install pipenv pytest"
+  - "pipenv install"
+script: python -m pytest tests/
