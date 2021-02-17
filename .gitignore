@@ -13,7 +13,7 @@ LJ_logdir/
 data/images/
 data/url_files/
 tests/data/images/*
-tests/data/url_files/*
+tests/data/url_files/python/*
 
 # Ignore virtual Environments
 youtube_upload/

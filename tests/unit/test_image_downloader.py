@@ -61,6 +61,8 @@ class ImageDownloaderTest(TestCase):
     def test_download_images(self):
         # check that ImageDownloader._get_link() is called correct number of times
         self.num_req = 2
+        self.main_keyword = 'test'
+        self.supp_list = ['1', '2']
         image_downloader = self._standard_image_downloader()
 
         expected_n_calls = sum(file_len(x) for x in image_downloader.mk_url_dir.glob('*.txt'))
