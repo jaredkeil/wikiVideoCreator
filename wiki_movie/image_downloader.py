@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Author: WuLC
 # @Date:   2017-09-27 23:02:19
-# @Last Modified by:   JUSTINPAULTURNER 
+# @Last Modified by:   JUSTINPAULTURNER
 # @Last Modified time: 2020-04-10 08:56:28
 
 
@@ -28,219 +28,176 @@ from multiprocessing import Pool
 from user_agent import generate_user_agent
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import NoSuchElementException, NoSuchAttributeException, ElementNotInteractableException
 from selenium.webdriver.common.keys import Keys
 
-
-def file_len(fname):
-    with open(fname) as f:
-        for i, l in enumerate(f):
-            pass
-    return i + 1  # i will be the index of the last line. 1 is added to account for the folder of resized images.
+from wiki_movie.google_images_locators import GoogleImagesLocators
+from wiki_movie.utils import write_seq_to_file, make_directory, file_len
 
 
-def get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested=20, connection_speed="medium"):
-    """get image links with selenium
-    
-    Args:
-        main_keyword (str): main keyword
-        supplemented_keywords (list[str]): list of supplemented keywords
-        url_dir (Path):
-        num_requested (int, optional): maximum number of images to download
-        connection_speed (str, optional): 'very slow', 'slow', 'medium', 'fast', or 'very fast'
-    
-    Returns:
-        None
-    """
-    number_of_scrolls = math.ceil(num_requested / 700)  # Set number of times to scroll
-    # 700 is currently arbitrary. It is an attempt to limit the images loaded.
-    
-    # Setting the wait time based on the set connection speed
-    if connection_speed == "very slow":
-        wait_time = 7
-    elif connection_speed == "slow":
-        wait_time = 3
-    elif connection_speed == "medium":
-        wait_time = 1
-    elif connection_speed == "fast":
-        wait_time = .5
-    elif connection_speed == "very fast":
-        wait_time = .25
-        
-    # Set current working directory
-    mk_url_dir = url_dir / main_keyword
+class ImageDownloader:
+    def __init__(self, main_keyword, supplemented_keywords, url_dir, img_dir,
+                 num_requested=10, connection_speed="medium", headless=True):
+        """
+        Args:
+            main_keyword (str): main keyword
+            supplemented_keywords (list[str]): list of supplemented keywords
+            url_dir (Path): parent directory where the url.txt files are stored to folder called <main_keyword>
+            img_dir (Path): parent directory where images will be downloaded to folder called <main_keyword>
+            num_requested (int, optional): maximum number of images to download
+            connection_speed (str, optional): 'very slow', 'slow', 'medium', 'fast', or 'very fast'
+        """
+        self.main_keyword = main_keyword
+        self.supplemented_keywords = supplemented_keywords
+        self.url_dir = url_dir
+        self.mk_url_dir = url_dir / main_keyword
+        self.img_dir = img_dir
+        self.num_requested = num_requested
+        self.wait_time = {'very slow': 7, 'slow': 3, 'medium': 1, 'fast': 0.5, 'very fast': .25}[connection_speed]
+        self.headless = headless
+        self.img_urls = set()
+        self._boot_driver()
 
-    options = Options()
-    options.headless = True
-    driver = webdriver.Firefox(options=options)
-    for ind, keyword in enumerate(supplemented_keywords):
-        img_urls = set()
-        search_query = quote(main_keyword + ' ' + keyword)
-        url = "https://www.google.com/search?q="+search_query+"&source=lnms&tbm=isch"
-        driver.get(url)
-        for _ in range(number_of_scrolls): # Scroll down page
+    def _boot_driver(self):
+        options = Options()
+        options.headless = self.headless
+        self.driver = webdriver.Firefox(options=options)
+
+    def find_and_download(self):
+        self._get_image_links()
+        self.driver.quit()
+        self._download_images()
+
+    def _get_image_links(self):
+        self._create_directories()
+        for keyword in self.supplemented_keywords:
+            self._scrape_urls(keyword)
+
+    def _scrape_urls(self, keyword):
+        # Perform a google image search and load enough results
+        self._search_for_images(keyword)
+        self._show_more_results()
+
+        thumbs = self._get_thumbnails()
+
+        # Scrape the urls from thumbnails
+        urls = self._get_urls_from_thumbs(thumbs)
+        self.img_urls.update(urls)
+
+        # write urls in appropriate text file, named by keyword
+        link_file_path = self._define_link_file_path(keyword)
+        write_seq_to_file(urls, link_file_path)
+
+    def _search_for_images(self, keyword):
+        formatted_query = quote(self.main_keyword + ' ' + keyword)
+        self.driver.get("https://www.google.com/search?q=" + formatted_query + "&source=lnms&tbm=isch")
+
+    def _show_more_results(self):
+        """Scroll down the page to load more image results."""
+        for _ in range(math.ceil(self.num_requested / 700)):
             for __ in range(2):
-                # multiple scrolls needed to show all images
-                driver.execute_script("window.scrollBy(0, 1000000)")
+                self.driver.execute_script("window.scrollBy(0, 1000000)")
                 time.sleep(2)
-            # to load next images
             time.sleep(1)
             try:
-                driver.find_element_by_xpath("//input[@value='Show more results']").click()
-            except Exception as e:
-                print(f"Process {main_keyword} reached the end of page")
+                self.driver.find_element(*GoogleImagesLocators.MORE_RESULTS).click()
+            except ElementNotInteractableException:
                 break
 
-        thumbs = driver.find_elements_by_xpath('//a[@class="wXeWr islib nfEiy mM5pbd"]')
+    def _get_thumbnails(self):
+        return self.driver.find_elements(*GoogleImagesLocators.THUMBNAILS)
 
-        # print(f"Number of thumbnails on screen: {len(thumbs)}") # Optional
-        
-        for i, thumb in enumerate(thumbs[:num_requested]):
-            sys.stdout.write(f"Finding URL's [{'#' * (i+1) + ' ' * (num_requested - i -1)}]   \r")
-            sys.stdout.flush() 
+    def _get_urls_from_thumbs(self, thumbs):
+        urls = set()
+        for i, t in enumerate(thumbs[:self.num_requested]):
+            sys.stdout.write(f"Finding URL's [{'#' * (i + 1) + ' ' * (self.num_requested - i - 1)}]   \r")
+            sys.stdout.flush()
+            urls.update(self._extract_url_from_thumb(t))
+        return urls
+
+    def _extract_url_from_thumb(self, thumb):
+        try:
+            thumb.click()
+            time.sleep(self.wait_time)
+        except ElementNotInteractableException:
+            print("Error clicking one thumbnail")
+
+        src_urls = set()
+        for el in self.driver.find_elements(*GoogleImagesLocators.URLS_IN_THUMBS):
             try:
-                thumb.click()
-                time.sleep(wait_time)  # This is wait time for the image to load in it's higher resolution so that the URL can be retrieved
-            except:
-                print("Error clicking one thumbnail")
-
-            url_elements = driver.find_elements_by_xpath('//img[@class="n3VNCb"]')
-            for url_element in url_elements:
-                try:
-                    url = url_element.get_attribute('src')
-                except:
-                    print("Error getting one url")
-
+                url = el.get_attribute('src')
                 if url.startswith('http') and not url.startswith('https://encrypted-tbn0.gstatic.com'):
-                    img_urls.add(url)
-        
-            # Create URL file directories
-            if not url_dir.exists():
-                url_dir.mkdir()
-                print(url_dir, "directory created")
-            elif url_dir.exists():
-                print(url_dir, "exists")
-            
-            # Create main keyword url directory
-            if not mk_url_dir.exists():
-                mk_url_dir.mkdir()
-                print(url_dir, "directory created")
-            elif mk_url_dir.exists():
-                print(mk_url_dir, "exists")
+                    src_urls.add(url)
+            except NoSuchAttributeException:
+                print("Error getting one url")
+        return src_urls
 
-            # Defining link file path    
-            if keyword != " ":
-                fname = f"{main_keyword + '/' + keyword}.txt"
-            elif keyword == " ":
-                fname = f"{main_keyword + '/' + main_keyword}.txt"
-            link_file_path = url_dir / fname
-            if not link_file_path.exists():
-                link_file_path.touch(mode=0o777)
-                print(f"Made file {link_file_path}")
-            
-            # Saving url links in file
-            with link_file_path.open('w') as wf:
-                for url in img_urls:
-                    # print(url)
-                    wf.write(url +'\n')
-
-        print(f'\nStored {len(img_urls)} links in {link_file_path}')
-    
-    driver.quit()
-
-
-def download_images(main_keyword, supplemented_keywords, url_dir, img_dir):
-    """download images whose links are in the link file
-    
-    Args:
-        main_keyword (str): main keyword used previously by get_image_links
-        supplemented_keywords lst(str): supplemental keywords used in the previous image search
-        url_dir (Path): directory where the url.txt files are stored
-        img_dir (Path): directory to store the downloaded images
-
-    Returns:
-        None
-    """
-
-    if not os.path.exists(img_dir):
-        os.makedirs(img_dir)
-    
-    for ind, s_keyword in enumerate(supplemented_keywords):
-        if s_keyword == " ":
-            sk_img_dir = img_dir / main_keyword  # sets the path to the directory on where to save images to
-            link_file_path = url_dir / main_keyword / f"{main_keyword}.txt"  # sets the path to the url file to access
+    def _define_link_file_path(self, keyword):
+        if keyword == " ":
+            return self.url_dir / f"{self.main_keyword + '/' + self.main_keyword}.txt"
         else:
-            sk_img_dir = img_dir / s_keyword  # sets the path to the directory on where to save images to
-            link_file_path = url_dir / main_keyword / f"{s_keyword}.txt"  # sets the path to the url file to access
+            return self.url_dir / f"{self.main_keyword + '/' + keyword}.txt"
 
-        # Create directory to save supplemental keyword images
-        if not os.path.exists(sk_img_dir):
-            os.makedirs(sk_img_dir)
+    def _define_supp_img_dir(self, keyword):
+        if keyword == " ":
+            return self.img_dir / self.main_keyword
+        else:
+            return self.img_dir / keyword
 
-        print(f"starting download of images inside directory {s_keyword}")  # Terminal message
-        
-        count = 0  # Used as the name the image title when saved
-        headers = {}  # Used by selenium
-        
-        # start to download images
+    def _create_directories(self):
+        make_directory(self.url_dir)
+        make_directory(self.mk_url_dir)
+        make_directory(self.img_dir)
+
+    def _download_images(self):
+        """download images whose links are in the link file"""
+        # iterate through keywords
+        for keyword in self.supplemented_keywords:
+            sk_img_dir = self._define_supp_img_dir(keyword)
+            make_directory(sk_img_dir)
+            self.img_path = 0
+            self._download_image_from_keyword(keyword)
+
+            downloaded_num = os.stat(sk_img_dir).st_nlink
+            print(f"\nSuccessfully downloaded {downloaded_num} images for keyword '{keyword}'.")
+
+    def _download_image_from_keyword(self, keyword):
+        print(f"starting download of images inside directory {keyword}")
+
+        link_file_path = self._define_link_file_path(keyword)
+        n_links = file_len(link_file_path)
+
         with link_file_path.open('r') as rf:
             for i, link in enumerate(rf.readlines()):
                 print(link)
-                sys.stdout.write(f"Downloading images [{'#' * (i+1) + ' ' * (file_len(link_file_path) - i -1)}]   \r")
-                sys.stdout.flush() 
-                try:
-                    parsed = urlparse(link)
-                    referer = parsed.scheme + '://' + parsed.hostname
-                    # ex. referer = 'https://www.google.com'
-                    ua = generate_user_agent()
-                    headers['User-Agent'] = ua
-                    headers['referer'] = referer
-                    # print(f'\n{link.strip()}\n{referer}\n{ua}')
-                    req = urllib.request.Request(link.strip(), headers=headers)
-                    response = urllib.request.urlopen(req, timeout=10)
-                    file_path = sk_img_dir / f'{count}.jpg'
-                    with file_path.open('wb') as wf:
-                        wf.write(response.read())
-                    # print(f'Process-{main_keyword} download image {main_keyword}/{count}.jpg')
-                    count += 1
+                sys.stdout.write(
+                    f"Downloading images [{'#' * (i + 1) + ' ' * (n_links - i - 1)}]   \r")
+                sys.stdout.flush()
+                self._get_link(link, keyword)
 
-                except urllib.error.URLError as e:
-                    print('URLError')
-                    logging.error(f'URLError while downloading image {link}. Reason:{e.reason}')
-                    continue
-                except urllib.error.HTTPError as e:
-                    print('HTTPError')
-                    logging.error(f'HTTPError while downloading image {link}. http code {e.code}, reason:{e.reason}')
-                    continue
-                except Exception as e:
-                    print('Unexpected Error')
-                    logging.error(f'Unexpected error while downloading image {link}. error type:{e.args}')
-                    continue
-            downloaded_num = os.stat(sk_img_dir).st_nlink 
-            print(f"\nSuccessfully downloaded {downloaded_num} images")
+    def _get_link(self, link, keyword):
+        try:
+            self._save_link(link, keyword)
+            self.img_path += 1
+        except urllib.error.HTTPError as e:
+            logging.error(f'HTTPError while downloading image {link}. http code {e.code}, reason:{e.reason}')
+        except urllib.error.URLError as e:
+            logging.error(f'URLError while downloading image {link}. Reason:{e.reason}')
+        except Exception as e:
+            logging.error(f'Unexpected error while downloading image {link}. error type:{e.args}')
 
+    def _save_link(self, link, keyword):
+        response = self._req_response(link)
+        file_path = self._define_supp_img_dir(keyword) / f'{self.img_path}.jpg'
+        with file_path.open('wb') as wf:
+            wf.write(response.read())
 
-def master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_requested=20, connection_speed="medium"):
-    """
-    Retrieve image URLs and download, in two step process.
-
-    Args:
-        main_keyword (str): Keyword to search google with
-        url_dir: directory to store the generated .txt file containing list of image URLs
-        img_dir: parent directory to store the downloaded images
-    Returns:
-        None
-    """
-    get_image_links(main_keyword, supplemented_keywords, url_dir, num_requested=num_requested, connection_speed=connection_speed)
-    download_images(main_keyword, supplemented_keywords, url_dir, img_dir)
-
-
-if __name__ == "__main__":
-    p = Path(os.getcwd())
-
-    main_keyword = "Badger"
-    supplemented_keywords = ["Tiny","Huge","Cute"]
-
-    url_dir = p / "url_files" 
-    img_dir = p / "images" / main_keyword
-
-    master_download(main_keyword, supplemented_keywords, url_dir,  img_dir, num_requested=5, connection_speed="medium")
+    @staticmethod
+    def _req_response(url):
+        parsed = urlparse(url)
+        headers = {
+            'User-Agent': generate_user_agent(),
+            'referer': parsed.scheme + '://' + parsed.hostname  # ex. referer = 'https://www.google.com'
+        }
+        req = urllib.request.Request(url.strip(), headers=headers)
+        return urllib.request.urlopen(req, timeout=10)

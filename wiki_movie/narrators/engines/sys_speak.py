@@ -1,10 +1,10 @@
 import subprocess
 import sys
 
-from wiki_movie.utils import localtime_filepath, repository_root, make_directory
+from wiki_movie.utils import localtime_filepath, repository_root, make_directory, has_extension, add_extension
 
 
-def save_mac(message=None, file=None, voice='Alex', file_name=None):
+def save_mac(message=None, file=None, voice='Alex', rate=200, file_name=None):
     if not (message or file):
         raise ValueError('Please specify either message(str) or file (path to text file, as str)')
 
@@ -16,7 +16,10 @@ def save_mac(message=None, file=None, voice='Alex', file_name=None):
         make_directory(save_dir)
         file_name = localtime_filepath(save_dir, 'aiff')
 
-    args = ['say', '-v', voice, '-o', file_name]
+    if not has_extension(file_name, 'aiff'):
+        file_name = add_extension(file_name, 'aiff')
+
+    args = ['say', '-v', voice, '-r', rate, '-o', file_name]
     if file:
         args.extend(['-f', file])
     else:
@@ -25,16 +28,19 @@ def save_mac(message=None, file=None, voice='Alex', file_name=None):
     subprocess.run(args)
 
 
-def save_linux(message, file_name=None):
+def save_linux(message, file_name=None, **kwargs):
     # For Linux-Ubuntu with eSpeak installed:
     # espeak {message} --stdout > {file_name.wav}
 
     if not file_name:
         save_dir = repository_root / 'data' / 'audio' / 'untitled'
         make_directory(save_dir)
-        file_name = localtime_filepath(save_dir, 'aiff')
+        file_name = localtime_filepath(save_dir, 'wav')
 
-    subprocess.run(['espeak', message, '--stdout', '>', ])
+    if not has_extension(file_name, 'wav'):
+        file_name = add_extension(file_name, 'wav')
+
+    subprocess.run(['espeak', message, '--stdout', '>', file_name])
 
 
 def save(*args, **kwargs):
