@@ -9,6 +9,11 @@ Install firefox, geckodriver:
 
 `sudo apt-get install firefox-geckodriver`
 
+Or use homebrew.
+
+`brew install --cask firefox'
+`brew install geckodriver`
+
 (Selenium installs with python dependencies in requirements.txt)
 
 
@@ -17,8 +22,8 @@ Install [ImageMagick](https://imagemagick.org/script/download.php), and [Ghostsc
 - method depends on operating system (Linux, macOS, Windows)
 - Linux:
     
-    `sudo apt install imagemagick` 
-
+    `sudo apt install imagemagick` or `brew install imagemagick`
+  
     You may need to alter the policy.xml file of ImageMagick. To find where the file is located, run:
     
     `convert -list policy`
@@ -42,7 +47,7 @@ Install [ImageMagick](https://imagemagick.org/script/download.php), and [Ghostsc
 
 - Ghostscript:
 
-    `sudo apt install ghostscript`
+    `sudo apt install ghostscript` or `brew install ghostscript`
 
 Install [SoundFile](https://pysoundfile.readthedocs.io/en/latest/#installation)
    
