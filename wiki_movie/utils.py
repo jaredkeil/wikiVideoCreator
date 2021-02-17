@@ -1,7 +1,9 @@
 from pathlib import Path
+import time
 
 
 repository_root = Path(__file__).resolve().parents[1]
+
 
 def write_seq_to_file(seq, file_path):
     """
@@ -32,3 +34,12 @@ def file_len(file_name):
     return i  # i will be the index of the last line. 1 is added to account for the folder of resized images.
 
 
+def localtime_filepath(directory, extension):
+    """
+    directory -- Path
+    extension -- str
+
+    return -- str
+    """
+    formatted_current_time = time.strftime('%H.%M.%S', time.localtime())
+    return str(directory / str(formatted_current_time + '.' + extension))

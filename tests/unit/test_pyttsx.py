@@ -1,5 +1,6 @@
 from unittest import TestCase
 import time
+import os
 
 import pyttsx3
 from wiki_movie.utils import repository_root, make_directory
@@ -12,7 +13,7 @@ def localtime_filepath(directory, extension):
 
     return -- str
     """
-    formatted_current_time = time.strftime('%H.%M.%S.%MS', time.localtime())
+    formatted_current_time = time.strftime('%H.%M.%S', time.localtime())
     return str(directory / str(formatted_current_time + '.' + extension))
 
 
@@ -44,3 +45,19 @@ class PyttsxTest(TestCase):
         file_path = localtime_filepath(self.audio_dir, 'wav')
         self.engine.save_to_file(text, file_path)
         self.engine.runAndWait()
+
+    def test_save_with_wait(self):
+        text = 'If there is no audio after this sentence, the test failed. If hearing this then test passed.'
+        text = ' '.join(text + f' {i} loops complete.' for i in range(5))
+
+        file_path = localtime_filepath(self.audio_dir, 'aiff')
+        print(file_path)
+        print(list(os.listdir(self.audio_dir)))
+
+        while not os.path.exists(file_path):
+            val = self.engine.save_to_file(text, file_path)
+            print('val', val)
+            time.sleep(2)
+            res = self.engine.runAndWait()
+            print('res', res)
+            time.sleep(2)
