@@ -13,4 +13,3 @@ install:
   - pipenv sync
 script:
   - pytest
-
