@@ -19,8 +19,10 @@ def get_page_list(url, n_pages):
     page_list = list(map(lambda x: WikiAPI.page(x), table["Article"][:n_pages]))
     return page_list
 
+
 def get_top25(n_pages):
     return get_page_list("https://en.wikipedia.org/wiki/Wikipedia:Top_25_Report", n_pages)
+
 
 def upload_to_youtube(movie):
     # <movie> (movie_maker.WikiMovie) -- A WikiMovie that has run .make_movie()
@@ -73,7 +75,7 @@ def main(opt):
     elif opt.top25: 
         page_list = get_top25(opt.n_pages)
     elif opt.url: 
-        page_list = custom_list(opt.url, opt.n_pages)
+        page_list = get_page_list(opt.url, opt.n_pages)
 
     for page in page_list:
 
@@ -117,5 +119,5 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--n_pages', type=int, default=25, help='how many pages to include when processing multiple pages')
     parser.add_argument('-c', '--cutoff', type=int,  help='number of characters to include from each section')
     
-    opt = parser.parse_args()
-    main(opt)
+    options = parser.parse_args()
+    main(options)

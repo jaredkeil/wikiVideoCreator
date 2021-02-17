@@ -23,8 +23,8 @@ from datetime import datetime
 
 import image_downloader
 import im_funcs
-from dc_tts.synthesize import synthesize as dctts_synthesize
-from dc_tts.hyperparams import Hyperparams as hp
+# from dc_tts.synthesize import synthesize as dctts_synthesize
+# from dc_tts.hyperparams import Hyperparams as hp
 
 # Default Parameters
 WHITE = (255, 255, 255)
@@ -43,7 +43,7 @@ excluded_sections = {'See also', 'References', 'Further reading', 'External link
 stops = {'\n', '\t', 'e.g.', '[sic]', '[...]', 'i.e.', }  # strings to remove from article text
 
 
-class WikiMovie():
+class WikiMovie:
     """
     Make movies in standard format (.mp4) from wikipedia pages.
 
@@ -55,7 +55,9 @@ class WikiMovie():
         """
         Args:
         page (wikipediaapi.WikipediaPage) -- Specific page object used to make movie.
-        narrator (str) -- text-to-speech engine ["gtts"= google, "dctts"=neural net] (default "gtts")
+        narrator (str) -- text-to-speech engine ["gtts" = google TTS API,
+                                                "dctts" = neural net,
+                                                "pytts" = pyttsx3 engine] (default "gtts")
         overwrite (bool) -- Overwrite audio (default True) 
         """
         self.page = page
@@ -72,7 +74,7 @@ class WikiMovie():
 
         self.p = Path(__file__).resolve().parents[0]
         # self.p = Path(os.path.abspath('')).resolve() ## For jupyter notebook
-        self._imgidx = 0  # For starting image seqeunces on unique image
+        self._imgidx = 0  # For starting image sequences on unique image
         self.cutoff = None
 
     def _validate_narrator(self):
