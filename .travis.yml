@@ -1,6 +1,8 @@
 language: python
 python:
   - "3.9.1"
+services:
+  - xvfb
 addons:
   apt:
     packages:
