@@ -12,7 +12,6 @@ import moviepy.video.fx.all as vfx
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 # import gizeh as gz
 
-# from gtts import gTTS, gTTSError
 
 import pyttsx3
 
@@ -21,8 +20,9 @@ from pydub import AudioSegment
 import time
 from datetime import datetime
 
-import image_downloader
-import im_funcs
+import image_downloader_old
+from wiki_movie.image_downloader import ImageDownloader
+from wiki_movie import im_funcs
 # from dc_tts.synthesize import synthesize as dctts_synthesize
 # from dc_tts.hyperparams import Hyperparams as hp
 
@@ -273,7 +273,6 @@ class WikiMovie:
                         time.sleep(60)
 
     def pytts(self, string, aiffpath):
-
         self.engine.save_to_file(string, aiffpath)
         self.engine.runAndWait()
 
@@ -338,7 +337,7 @@ class WikiMovie:
 
         Args:
         hp (Hyperparams) -- Hyperparams object with attributes test_data, max_N, 
-        cutoff (int) -- Limit the length of the script. Used like script[:cutoff]
+        cutoff (int) -- Limit the length of the script (for testing purposes). Used like script[:cutoff]
         """
         print("Video Title: ", self.title)
         self.cutoff = cutoff
@@ -356,12 +355,18 @@ class WikiMovie:
         # Download and resize images
         self.get_keywords()
 
-        image_downloader.master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
-                                         url_dir=self.url_dir, img_dir=self.imgdir, num_requested=5)
+        # image_downloader_old.master_download(main_keyword=self.title, supplemented_keywords=self.keywords,
+        #                                      url_dir=self.url_dir, img_dir=self.imgdir, num_requested=5)
+
+        image_downloader = ImageDownloader(main_keyword=self.title, supplemented_keywords=self.keywords,
+                                           url_dir=self.url_dir, img_dir=self.imgdir, num_requested=5,
+                                           connection_speed='medium', headless=True)
+        image_downloader.find_and_download()
+
         self.process_images()
         print('\n')
 
-        # Text-to-speach ()
+        # Text-to-speech ()
         print('Creating audio. . . ')
         self.make_narration()
 

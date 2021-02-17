@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import time
 
 
@@ -43,3 +44,12 @@ def localtime_filepath(directory, extension):
     """
     formatted_current_time = time.strftime('%H.%M.%S', time.localtime())
     return str(directory / str(formatted_current_time + '.' + extension))
+
+
+def has_extension(path, expected_ext):
+    root, ext = os.path.splitext(path)
+    return ext == expected_ext
+
+
+def add_extension(path, suffix):
+    return path + '.' + suffix
