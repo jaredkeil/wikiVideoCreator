@@ -3,7 +3,7 @@ from unittest.mock import patch
 from pathlib import Path
 import os
 
-from wiki_movie.image_downloader2 import ImageDownloader
+from wiki_movie.image_downloader import ImageDownloader
 from wiki_movie.utils import repository_root, file_len
 
 

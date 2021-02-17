@@ -3,7 +3,7 @@ from sys import platform
 import time
 
 from wiki_movie.utils import repository_root
-from wiki_movie.sys_speak import save, save_linux, save_mac
+from wiki_movie.narrators.engines.sys_speak import save_linux, save_mac
 
 
 def skip_platform_msg(req):
