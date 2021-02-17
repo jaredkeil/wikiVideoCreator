@@ -12,7 +12,7 @@ LJ_logdir/
 *.png
 data/images/
 data/url_files/
-
+tests/data/*
 # Ignore virtual Environments
 youtube_upload/
 env/
