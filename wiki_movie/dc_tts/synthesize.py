@@ -9,7 +9,7 @@ from __future__ import print_function
 
 from train import Graph
 from utils import *
-from dc_tts.data_load import load_data
+from ..dc_tts.data_load import load_data
 from scipy.io.wavfile import write
 from tqdm import tqdm
 
@@ -59,8 +59,7 @@ def synthesize():
             wav = spectrogram2wav(mag)
             write(hp.sampledir + "/{}.wav".format(i+1), hp.sr, wav)
 
+
 if __name__ == '__main__':
     synthesize()
     print("Done")
-
-

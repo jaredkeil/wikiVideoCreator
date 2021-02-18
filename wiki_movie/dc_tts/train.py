@@ -9,8 +9,8 @@ from __future__ import print_function
 
 from tqdm import tqdm
 
-from dc_tts.data_load import get_batch, load_vocab
-from dc_tts.networks import TextEnc, AudioEnc, AudioDec, Attention, SSRN
+from ..dc_tts.data_load import get_batch, load_vocab
+from ..dc_tts.networks import TextEnc, AudioEnc, AudioDec, Attention, SSRN
 from utils import *
 import sys
 

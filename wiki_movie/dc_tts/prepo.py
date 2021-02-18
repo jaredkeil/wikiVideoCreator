@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 #/usr/bin/python2
-'''
+"""s
 By kyubyong park. kbpark.linguist@gmail.com.
 https://www.github.com/kyubyong/dc_tts
-'''
+"""
 
 from __future__ import print_function
 
 from utils import load_spectrograms
 import os
-from dc_tts.data_load import load_data
+from ..dc_tts.data_load import load_data
 import numpy as np
 import tqdm
 

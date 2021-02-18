@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 #/usr/bin/python2
-'''
-By kyubyong park. kbpark.linguist@gmail.com. 
+"""
+By kyubyong park. kbpark.linguist@gmail.com.
 https://www.github.com/kyubyong/dc_tts
-'''
+"""
 
 from __future__ import print_function
 
-from dc_tts.hyperparams import Hyperparams as hp
+from ..dc_tts.hyperparams import Hyperparams as hp
 from modules import *
 import tensorflow as tf
 
