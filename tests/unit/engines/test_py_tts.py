@@ -1,7 +1,7 @@
 from unittest import skipUnless
 from sys import platform
 
-from wiki_movie.narrators.engines import pyttsx_
+from wiki_movie.narrators.engines import py_tts
 from tests.unit.engine_base import BaseEngineTest, skip_platform_msg
 
 
@@ -16,7 +16,7 @@ class PyttsxTest(BaseEngineTest):
 
         self.assertFalse(file_path.exists())
 
-        pyttsx_.save(text, str(file_path))
+        py_tts.save(text, str(file_path))
 
         self.assertTrue(file_path.exists())
 
@@ -30,7 +30,7 @@ class PyttsxTest(BaseEngineTest):
 
         self.assertFalse(file_path.exists())
 
-        pyttsx_.save(text, str(file_path))
+        py_tts.save(text, str(file_path))
 
         self.assertTrue(file_path.exists())
 
@@ -46,7 +46,7 @@ class PyttsxTest(BaseEngineTest):
 
         self.assertFalse(expected_create_path.exists())
 
-        pyttsx_.save(text, str(file_path))
+        py_tts.save(text, str(file_path))
 
         self.assertTrue(expected_create_path.exists())
 
@@ -65,6 +65,6 @@ class PyttsxTest(BaseEngineTest):
 
         self.assertFalse(expected_create_path.exists())
 
-        pyttsx_.save(text, str(file_path))
+        py_tts.save(text, str(file_path))
 
         self.assertTrue(expected_create_path.exists())

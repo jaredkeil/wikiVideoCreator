@@ -3,7 +3,7 @@ from sys import platform
 import time
 
 from wiki_movie.utils import repository_root
-from wiki_movie.narrators.engines.sys_speak import save_linux, save_mac
+from wiki_movie.narrators.engines.sys_tts import save_linux, save_mac
 from tests.unit.engine_base import BaseEngineTest, skip_platform_msg
 
 
