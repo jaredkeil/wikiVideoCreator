@@ -1,10 +1,8 @@
 class BaseNarrator:
     def __init__(self, script):
         """
-        title (str) -- title of script
-        script (list) -- list of script dictionaries as used in WikiMovie class
+        script (list) -- list of script dictionaries (as used in WikiMovie class)
         """
-        self.title = script[0]['title']
         self.script = script
 
     def make_narration(self, audio_dir):
