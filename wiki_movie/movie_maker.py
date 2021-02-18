@@ -12,7 +12,6 @@ import moviepy.video.fx.all as vfx
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 # import gizeh as gz
 
-
 import pyttsx3
 
 from pydub import AudioSegment

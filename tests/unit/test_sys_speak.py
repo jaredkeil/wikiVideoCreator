@@ -4,15 +4,12 @@ import time
 
 from wiki_movie.utils import repository_root
 from wiki_movie.narrators.engines.sys_speak import save_linux, save_mac
+from tests.unit.engine_base import BaseEngineTest, skip_platform_msg
 
 
-def skip_platform_msg(req):
-    return f'Test is {req} platform exclusive. Skipping because platform is {platform}'
-
-
-class SysSpeakTest(TestCase):
+class SysSpeakTest(BaseEngineTest):
     def setUp(self):
-        self.audio_dir = repository_root / 'tests' / 'data' / 'audio'
+        super().__init__()
         self.text_dir = repository_root / 'tests' / 'data' / 'text'
 
     @skipUnless(platform == 'darwin', skip_platform_msg('darwin'))

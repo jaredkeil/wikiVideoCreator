@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
 import time
+import importlib.util
+import sys
 
 
 repository_root = Path(__file__).resolve().parents[1]
@@ -48,8 +50,26 @@ def localtime_filepath(directory, extension):
 
 def has_extension(path, expected_ext):
     root, ext = os.path.splitext(path)
-    return ext == expected_ext
+    return ext == '.' + expected_ext
 
 
 def add_extension(path, suffix):
     return path + '.' + suffix
+
+
+def change_extension(path, new_extension):
+    root, _ = os.path.splitext(path)
+    return root + '.' + new_extension
+
+
+def conditional_import(name):
+    if name in sys.modules:
+        print(f"{name!r} already in sys.modules")
+    elif (spec := importlib.util.find_spec(name)) is not None:
+        # If you chose to perform the actual import ...
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+        print(f"{name!r} has been imported")
+    else:
+        print(f"can't find the {name!r} module")

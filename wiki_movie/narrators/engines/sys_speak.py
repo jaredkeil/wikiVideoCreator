@@ -52,4 +52,4 @@ def save(*args, **kwargs):
     elif platform == "win32":
         raise NotImplementedError('Speech on Windows platform not implemented yet.')
     else:
-        raise NotImplementedError('Unrecognized platform.')
+        raise NotImplementedError(f'Unrecognized platform {platform}.')

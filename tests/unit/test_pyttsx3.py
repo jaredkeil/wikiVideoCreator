@@ -4,12 +4,12 @@ import os
 
 import pyttsx3
 from wiki_movie.utils import repository_root, make_directory, localtime_filepath
+from tests.unit.engine_base import BaseEngineTest
 
 
-class PyttsxTest(TestCase):
+class PyttsxTest(BaseEngineTest):
     def setUp(self):
-        self.audio_dir = repository_root / 'tests' / 'data' / 'audio'
-        make_directory(self.audio_dir)
+        super().__init__()
         self.engine = pyttsx3.init()
 
     def test_say(self):
