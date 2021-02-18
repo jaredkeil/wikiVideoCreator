@@ -1,10 +1,10 @@
-from unittest import TestCase, skipUnless
+from unittest import skipUnless
 from sys import platform
 import time
 
 from wiki_movie.utils import repository_root
 from wiki_movie.narrators.engines.sys_tts import save_linux, save_mac
-from tests.unit.engine_base import BaseEngineTest, skip_platform_msg
+from tests.unit.engines.engine_base import BaseEngineTest, skip_platform_msg
 
 
 class SysSpeakTest(BaseEngineTest):

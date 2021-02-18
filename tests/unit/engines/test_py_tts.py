@@ -2,7 +2,7 @@ from unittest import skipUnless
 from sys import platform
 
 from wiki_movie.narrators.engines import py_tts
-from tests.unit.engine_base import BaseEngineTest, skip_platform_msg
+from tests.unit.engines.engine_base import BaseEngineTest, skip_platform_msg
 
 
 class PyttsxTest(BaseEngineTest):

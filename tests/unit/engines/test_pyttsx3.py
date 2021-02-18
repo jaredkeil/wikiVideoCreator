@@ -1,10 +1,9 @@
-from unittest import TestCase
 import time
 import os
 
 import pyttsx3
-from wiki_movie.utils import repository_root, make_directory, localtime_filepath
-from tests.unit.engine_base import BaseEngineTest
+from wiki_movie.utils import localtime_filepath
+from tests.unit.engines.engine_base import BaseEngineTest
 
 
 class PyttsxTest(BaseEngineTest):

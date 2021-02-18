@@ -1,8 +1,5 @@
-from unittest import TestCase
-
 from wiki_movie.narrators.engines import google_tts
-from wiki_movie.utils import repository_root
-from tests.unit.engine_base import BaseEngineTest
+from tests.unit.engines.engine_base import BaseEngineTest
 
 
 class googleTTSTest(BaseEngineTest):
