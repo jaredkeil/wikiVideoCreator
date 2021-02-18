@@ -19,6 +19,7 @@ pydub = "*"
 [dev-packages]
 pyttsx3 = "*"
 pytest = "*"
+gtts = "*"
 
 [requires]
 python_version = "3.9"
