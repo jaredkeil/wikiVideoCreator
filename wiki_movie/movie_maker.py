@@ -71,7 +71,7 @@ class WikiMovie:
         self.keywords = [' ']
         self.clip_list = []
 
-        self.p = Path(__file__).resolve().parents[0]
+        self.p = Path(__file__).resolve().parents[0] / 'data'
         # self.p = Path(os.path.abspath('')).resolve() ## For jupyter notebook
         self._imgidx = 0  # For starting image sequences on unique image
         self.cutoff = None
@@ -307,28 +307,28 @@ class WikiMovie:
         Args: 
             sd (dict) -- A dictionary as found in self.script
         Returns:
-            V (VideoClip) -- Combined TextClip and (optional) ImageSequence
+            clip (VideoClip) -- Combined TextClip and (optional) ImageSequence
         """
         prefix = str(self.auddir / sd['title'])
-        afc_header = AudioFileClip(prefix + '_header.mp3').set_fps(1)
+        audio_clip_header = AudioFileClip(prefix + '_header.mp3').set_fps(1)
 
         font_size = 130 - (30 * sd['level'])  # higher level means deeper 'indentation'
-        V = (TextClip(sd['title'], color='white', fontsize=font_size, size=VIDEO_SIZE, method='caption')
-             .set_audio(afc_header)
-             .set_duration(afc_header.duration))
+        clip = (TextClip(sd['title'], color='white', fontsize=font_size, size=VIDEO_SIZE, method='caption')
+                .set_audio(audio_clip_header)
+                .set_duration(audio_clip_header.duration))
 
         if sd['title'] in self.keywords or sd['level'] == 0:
-            ACT = AudioFileClip(prefix + '_text.mp3').set_fps(1)
+            audio_clip_text = AudioFileClip(prefix + '_text.mp3').set_fps(1)
             print(sd['imgpaths'])
             print(sd['idd'])
-            IS = (ImageSequenceClip(sequence=sd['imgpaths'], durations=sd['idd'], load_images=True)
-                  .set_position(('center', 400))
-                  .fx(vfx.loop, duration=ACT.duration)
-                  .set_audio(ACT))
-            V = concatenate_videoclips([V, IS], method='compose')
+            image_seq_clip = (ImageSequenceClip(sequence=sd['imgpaths'], durations=sd['idd'], load_images=True)
+                              .set_position(('center', 400))
+                              .fx(vfx.loop, duration=audio_clip_text.duration)
+                              .set_audio(audio_clip_text))
+            clip = concatenate_videoclips([clip, image_seq_clip], method='compose')
         print(sd['title'], 'clip created!')
-        V = V.set_fps(1)
-        return V
+        clip = clip.set_fps(1)
+        return clip
 
     def make_movie(self, hp=None, cutoff=None):
         """
@@ -420,8 +420,8 @@ if __name__ == "__main__":
     # requested_name = input("What would you like the video to be about? ")
     # page = wiki.page(requested_name)
 
-    page = wiki.page(name)
+    wiki_page = wiki.page(name)
 
-    WMM = WikiMovie(page, narrator=opt.mode, overwrite=True)
+    WMM = WikiMovie(wiki_page, narrator=opt.mode, overwrite=True)
 
     WMM.make_movie(cutoff=None, hp=hp)  # hp parameter is really only necessary with dctts
