@@ -74,3 +74,15 @@ def conditional_import(name):
     else:
         print(f"can't find the {name!r} module")
 
+
+def get_platform_audio_ext():
+    """
+    Return default extension (str) for included platform audio encoders. Does not include '.'
+    """
+    if sys.platform == 'darwin':
+        return 'aiff'
+
+    elif sys.platform in ('linux', 'linux2', 'win32'):
+        return 'wav'
+    else:
+        raise NotImplementedError(f'Platform "{sys.platform}" unrecognized. Cannot find default audio file extension')

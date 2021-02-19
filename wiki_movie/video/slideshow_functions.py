@@ -21,14 +21,15 @@ SUBSCRIBE = "Please Subscribe!"
 
 def create_clip(clip_title, audio_dir, image_dir, level, include_images, fmt):
     """
-    Load back audio and attach it to proper clip.
+    Creates section title text clip, and optionally a slideshow, which the narrator reads text over.
 
     Args:
         clip_title (str) -- clip title
-        audio_dir (Path) -- location of audio, e.g. 'audio/<clip_title>/*.mp3'
+        audio_dir (Path) -- location of audio, e.g. 'audio/<clip_title>/*.wav'
         image_dir (Path) -- location of images (resized), e.g. 'images/python/resized/<clip_title>/*.jpg'
         level (int) -- Defines section indentation level. 0 is highest level, 3 would mean 3 levels indented.
-        include_images (bool) -- If a section actually contains text, this should be True.
+        include_images (bool) -- If section contains text, this should be True, to generate image loop.
+        fmt (str) -- audio format which narrator used.
     Returns:
         clip (VideoClip) -- Combined TextClip and (optional) ImageSequence
     """
@@ -47,6 +48,9 @@ def create_clip(clip_title, audio_dir, image_dir, level, include_images, fmt):
 
 
 def narrated_header(section_title, narration_path, level, fmt):
+    """
+    Create video which displays section title and attaches audio of narrator reading title."
+    """
     audio_clip_header = AudioFileClip(narration_path + f'_header.{fmt}').set_fps(1)
     return (TextClip(section_title, color='white', fontsize=130 - (30 * level), size=VIDEO_SIZE, method='caption')
             .set_audio(audio_clip_header)
@@ -54,6 +58,9 @@ def narrated_header(section_title, narration_path, level, fmt):
 
 
 def narrated_image_seq(narration_path, image_dir, fmt):
+    """
+    Create video which displays looping slideshow of images and attaches audio of narrator reading section text."
+    """
     audio_clip_text = AudioFileClip(narration_path + f'_text.{fmt}').set_fps(1)
     images = files_in_directory(image_dir)
     return (ImageSequenceClip(sequence=images,
@@ -80,4 +87,5 @@ def add_outro(clips):
 
 def save_video(clips, path):
     make_directory(path.parent)
-    clips.write_videofile(str(path), fps=1, codec='mpeg4', preset='ultrafast')
+    clips.write_videofile(str(path), fps=1, audio_codec='aac', preset='ultrafast', threads=2)
+    clips.close()

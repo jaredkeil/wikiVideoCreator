@@ -1,7 +1,7 @@
 from unittest import TestCase, mock, skipUnless
 import pkgutil
 
-from wiki_movie.video.movie_maker2 import WikiMovie
+from wiki_movie.video import WikiMovie
 from wiki_movie.utils import repository_root
 
 
@@ -33,7 +33,7 @@ class WikiMovieTest(TestCase):
 
         self.assertEqual(downloader.main_keyword, 'Test', 'Incorrect main keyword')
         self.assertEqual(downloader.url_dir, repository_root / 'data' / 'url_files', 'Incorrect url directory')
-        self.assertListEqual(downloader.supplemented_keywords, actual_keywords, 'Incorrect keyword list')
+        self.assertListEqual(downloader.supplemented_keywords, actual_keywords, 'Incorrect kseyword list')
 
     def test_pass_downloader_args(self):
         w_movie = WikiMovie(title='Test',
@@ -43,7 +43,8 @@ class WikiMovieTest(TestCase):
                             )
         downloader = w_movie.image_downloader
 
-
         self.assertEqual(downloader.img_dir, 'test_path')
         self.assertEqual(downloader.main_keyword, 'Test')
         self.assertListEqual(downloader.supplemented_keywords, ['1', '2', '3'])
+
+
