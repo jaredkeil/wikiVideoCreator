@@ -15,6 +15,10 @@ apiclient = "*"
 wikipedia-api = "*"
 moviepy = "*"
 pydub = "*"
+setuptools = "*"
+wheel = "*"
+pip = "*"
+opencv-python-headless = "*"
 
 [dev-packages]
 pyttsx3 = "*"
