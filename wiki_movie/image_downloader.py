@@ -37,7 +37,7 @@ from wiki_movie.utils import write_seq_to_file, make_directory, file_len
 
 class ImageDownloader:
     def __init__(self, main_keyword, supplemented_keywords, url_dir, img_dir,
-                 num_requested=10, connection_speed="medium", headless=True):
+                 num_requested=5, connection_speed="medium", headless=True):
         """
         Args:
             main_keyword (str): main keyword
