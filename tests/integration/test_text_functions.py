@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import wikipediaapi
 
-from wiki_movie.text import generate_script_list, flush_sections, remove_stopwords
+from wiki_movie.text import generate_section_dictionaries_list, flush_sections, remove_stopwords
 from tests.data.wiki_api.flushed_example import flushed
 
 
@@ -19,6 +19,6 @@ class TextFunctionsTest(TestCase):
 
     def test_flush_sections(self):
         page = self.wiki.page('Scottish Football League First Division')
-        script = generate_script_list(page)
+        script = generate_section_dictionaries_list(page)
 
         self.assertListEqual(flushed, script)

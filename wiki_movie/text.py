@@ -3,7 +3,7 @@ EXCLUDED_SECTIONS = {'See also', 'References', 'Further reading', 'External link
                      'Credits and personnel', 'Charts', 'Certifications', 'Release history'}
 
 
-def generate_script_list(page):
+def generate_section_dictionaries_list(page):
     """
     page (wikipediaapia.WikipediaPage)
     """
@@ -15,6 +15,10 @@ def generate_script_list(page):
 def flush_sections(script, sections, level=0):
     """
     Recurse through page levels (sections, subsections) and clean the text, modifying script in place.
+
+    script (list)
+    sections (list) -- list of WikipediaPageSections
+    level (int)
     """
     for s in sections:
         if s.title in EXCLUDED_SECTIONS:
