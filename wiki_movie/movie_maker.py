@@ -19,9 +19,9 @@ from pydub import AudioSegment
 import time
 from datetime import datetime
 
-import image_downloader_old
-from wiki_movie.image_downloader import ImageDownloader
-from wiki_movie import im_funcs
+from wiki_movie.image.downloader import ImageDownloader
+from wiki_movie.image import utils
+
 # from dc_tts.synthesize import synthesize as dctts_synthesize
 # from dc_tts.hyperparams import Hyperparams as hp
 
@@ -215,7 +215,7 @@ class WikiMovie:
             path = str(sk_imgdir / fname)
             save_path = str(self.resizedir / fname)
             try:
-                im_funcs.maxsize_pad(path, save_path)
+                utils.maxsize_pad(path, save_path)
             except Exception:
                 print(f'error saving resized image: {fname}')
                 continue
