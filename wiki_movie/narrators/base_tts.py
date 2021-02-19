@@ -14,8 +14,6 @@ class BaseNarrator:
             self._narrate_section(script_section, audio_dir)
 
     def _narrate_section(self, section, audio_dir):
-        section_audio_file_prefix = audio_dir / section['title']
-
         self._save_section(section['title'], audio_dir / (section['title']+'_header'))
         if section['text']:
             self._save_section(section['text'], audio_dir / (section['title']+'_text'))
