@@ -2,12 +2,12 @@ from wiki_movie.narrators.base_tts import BaseNarrator
 from wiki_movie.narrators.engines import dc_tts as dc_engine
 
 
-def build_narrator(**kwargs):
-    return DcttsNarrator(**kwargs)
+def build_narrator(*args, **kwargs):
+    return DcttsNarrator(*args, **kwargs)
 
 
 class DcttsNarrator(BaseNarrator):
-    def __init__(self, script, dctts_data_dir):
+    def __init__(self, script, dctts_data_dir, *args, **kwargs):
         title = script[0]['title']
         dc_engine.Hyperparams.test_data = str(dctts_data_dir / 'text_input' / f'{title}.txt')
         dc_engine.Hyperparams.sampledir = str(dctts_data_dir / 'samples' / title)
