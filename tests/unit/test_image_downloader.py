@@ -1,9 +1,8 @@
 from unittest import TestCase
 from unittest.mock import patch
-from pathlib import Path
 import os
 
-from wiki_movie.image_downloader import ImageDownloader
+from wiki_movie.image.downloader import ImageDownloader
 from wiki_movie.utils import repository_root, file_len
 
 
@@ -37,14 +36,12 @@ class ImageDownloaderTest(TestCase):
         self.image_downloader = self._standard_image_downloader()
         self.assertEqual(1, self.image_downloader.wait_time,
                          '"medium" connection speed not setting proper wait_time of 1 second.')
-        self.image_downloader.driver.close()
 
     def test_headless(self):
         self.image_downloader = self._standard_image_downloader()
         self.assertEqual(True, self.image_downloader.headless)
 
     def test_search_for_images(self):
-        self.headless = False
         self.image_downloader = self._standard_image_downloader()
         keyword = self.supp_list[0]
         self.image_downloader._search_for_images(keyword=keyword)

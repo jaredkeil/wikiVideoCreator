@@ -24,14 +24,12 @@ import urllib.request
 import urllib.error
 from urllib.parse import urlparse, quote
 
-from multiprocessing import Pool
 from user_agent import generate_user_agent
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from selenium.common.exceptions import NoSuchElementException, NoSuchAttributeException, ElementNotInteractableException
-from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchAttributeException, ElementNotInteractableException
 
-from wiki_movie.google_images_locators import GoogleImagesLocators
+from wiki_movie.image.google_images_locators import GoogleImagesLocators
 from wiki_movie.utils import write_seq_to_file, make_directory, file_len
 
 
@@ -53,7 +51,7 @@ class ImageDownloader:
         self.mk_url_dir = url_dir / main_keyword
         self.img_dir = img_dir
         self.num_requested = num_requested
-        self.wait_time = {'very slow': 7, 'slow': 3, 'medium': 1, 'fast': 0.5, 'very fast': .25}[connection_speed]
+        self.wait_time = {'very slow': 7, 'slow': 3, 'medium': 1, 'fast': 0.5, 'very fast': .25}.get(connection_speed, 1)
         self.headless = headless
         self.img_urls = set()
         self._boot_driver()
@@ -147,7 +145,6 @@ class ImageDownloader:
     def _create_directories(self):
         make_directory(self.url_dir)
         make_directory(self.mk_url_dir)
-        make_directory(self.img_dir)
 
     def _download_images(self):
         """download images whose links are in the link file"""
