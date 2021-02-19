@@ -7,7 +7,7 @@ def build_narrator(*args, **kwargs):
 
 
 class SystemNarrator(BaseNarrator):
-    def __init__(self, script, voice=None, rate=None, *args, **kwargs):
+    def __init__(self, script, voice='', rate='', *args, **kwargs):
         self.voice = voice
         self.rate = rate
         self._save = sys_tts.save
