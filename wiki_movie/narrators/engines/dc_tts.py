@@ -6,6 +6,9 @@ from wiki_movie.dc_tts.synthesize import synthesize
 from wiki_movie.dc_tts.hyperparams import Hyperparams
 
 
+def save_samples():
+    synthesize()
+
 def recombine_wavs(script, sample_dir, audio_dir):
     """
     Combine the short wav files outputs from dc-tts into by article section.
