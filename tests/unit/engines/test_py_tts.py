@@ -33,7 +33,7 @@ class PyttsxTest(BaseEngineTest):
         self.assertFalse(file_path.exists())
 
         py_tts.save(text, str(file_path))
-
+        time.sleep(1)
         self.assertTrue(file_path.exists())
 
     def test_save_no_extension(self):
@@ -49,7 +49,7 @@ class PyttsxTest(BaseEngineTest):
         self.assertFalse(expected_create_path.exists())
 
         py_tts.save(text, str(file_path))
-        time.sleep(5)
+        time.sleep(1)
         self.assertTrue(expected_create_path.exists())
 
     def test_save_bad_extension(self):
@@ -68,5 +68,5 @@ class PyttsxTest(BaseEngineTest):
         self.assertFalse(expected_create_path.exists())
 
         py_tts.save(text, str(file_path))
-
+        time.sleep(1)
         self.assertTrue(expected_create_path.exists())
