@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skipIf
 from unittest.mock import patch
 import os
 
@@ -31,7 +31,8 @@ class ImageDownloaderTest(TestCase):
                                self.speed,
                                self.headless)
 
-    def test_create_image_downloader(self):
+    @skipIf(os.environ.get('DISPLAY') is None, 'DISPLAY not configured')
+    def test_non_headless(self):
         self.headless = False
         self.image_downloader = self._standard_image_downloader()
         self.assertEqual(1, self.image_downloader.wait_time,
