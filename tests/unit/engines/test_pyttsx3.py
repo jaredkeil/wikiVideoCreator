@@ -8,7 +8,7 @@ from tests.unit.engines.engine_base import BaseEngineTest
 
 class PyttsxTest(BaseEngineTest):
     def setUp(self):
-        super().__init__()
+        super().setUp()
         self.engine = pyttsx3.init()
 
     def test_say(self):

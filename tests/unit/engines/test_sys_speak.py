@@ -9,7 +9,7 @@ from tests.unit.engines.engine_base import BaseEngineTest, skip_platform_msg
 
 class SysSpeakTest(BaseEngineTest):
     def setUp(self):
-        super().__init__()
+        super().setUp()
         self.text_dir = repository_root / 'tests' / 'data' / 'text'
 
     @skipUnless(platform == 'darwin', skip_platform_msg('darwin'))
