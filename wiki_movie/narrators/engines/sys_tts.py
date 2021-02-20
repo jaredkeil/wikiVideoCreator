@@ -44,7 +44,7 @@ def save_linux(message, file_name=None, **kwargs):
     if not has_extension(file_name, ext):
         file_name = add_extension(file_name, ext)
 
-    subprocess.run(['espeak', message, '--stdout', '>', file_name])
+    subprocess.run(['espeak', message, '-w', file_name])
 
 
 def save(*args, **kwargs):
