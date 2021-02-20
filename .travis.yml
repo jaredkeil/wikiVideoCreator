@@ -1,14 +1,17 @@
 language: python
 python:
-  - "3.9.1"
+- 3.9.1
 services:
-  - xvfb
+- xvfb
 addons:
   apt:
     packages:
-      - firefox-geckodriver
-      - ffmpeg
+    - firefox-geckodriver
+    - ffmpeg
+before_install:
+- openssl aes-256-cbc -K $encrypted_77644dcdfd96_key -iv $encrypted_77644dcdfd96_iv -in upload_video.py-oauth2.json.enc -out wiki_movie/upload_video.py-oauth2.json -d
+- openssl aes-256-cbc -K $encrypted_a789e8191f70_key -iv $encrypted_a789e8191f70_iv -in client_secrets.json.enc -out wiki_movie/client_secrets.json -d
 install:
-  - "pip install pipenv pytest"
-  - "pipenv install"
+- pip install pipenv pytest
+- pipenv install
 script: python -m pytest tests/
