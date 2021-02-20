@@ -22,7 +22,7 @@ def save_mac(message=None, file=None, voice='Alex', rate=200, file_name=None):
     if not has_extension(file_name, ext):
         file_name = add_extension(file_name, ext)
 
-    args = ['say', '-v', voice, '-r', rate, '-o', file_name]
+    args = ['say', '-v', voice, '-r', str(rate), '-o', file_name]
     if file:
         args.extend(['-f', file])
     else:
