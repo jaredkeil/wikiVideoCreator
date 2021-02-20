@@ -1,7 +1,9 @@
 from unittest import skipUnless
 from sys import platform
+import time
 
 from wiki_movie.narrators.engines import py_tts
+from wiki_movie.utils import add_extension
 from tests.unit.engines.engine_base import BaseEngineTest, skip_platform_msg
 
 
@@ -47,7 +49,7 @@ class PyttsxTest(BaseEngineTest):
         self.assertFalse(expected_create_path.exists())
 
         py_tts.save(text, str(file_path))
-
+        time.sleep(5)
         self.assertTrue(expected_create_path.exists())
 
     def test_save_bad_extension(self):
