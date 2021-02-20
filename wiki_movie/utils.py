@@ -51,7 +51,7 @@ def localtime_filepath(directory, extension):
 def has_extension(path, expected_ext):
     """
     Check if file has extension. <expected_ext> should not include a dot ('.')
-    path (str) -- e.g. '/path/to/file.ext'
+    path (str or Path) -- e.g. '/path/to/file.ext'
     expected_ext (str) -- e.g. 'wav'
 
     Returns
