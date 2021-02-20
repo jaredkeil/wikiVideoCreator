@@ -1,5 +1,4 @@
 import pyttsx3
-from sys import platform
 
 from wiki_movie.utils import has_extension, add_extension, change_extension, get_platform_audio_ext
 
@@ -17,5 +16,3 @@ def save(text, file_name):
     engine = pyttsx3.init()
     engine.save_to_file(text, file_name)
     engine.runAndWait()
-
-
