@@ -33,7 +33,9 @@ class WikiMovieTest(TestCase):
 
         self.assertEqual(downloader.main_keyword, 'Test', 'Incorrect main keyword')
         self.assertEqual(downloader.url_dir, repository_root / 'data' / 'url_files', 'Incorrect url directory')
-        self.assertListEqual(downloader.supplemented_keywords, actual_keywords, 'Incorrect kseyword list')
+        self.assertListEqual(downloader.supplemented_keywords, actual_keywords, 'Incorrect keyword list')
+
+        downloader.driver.quit()
 
     def test_pass_downloader_args(self):
         w_movie = WikiMovie(title='Test',
@@ -47,4 +49,4 @@ class WikiMovieTest(TestCase):
         self.assertEqual(downloader.main_keyword, 'Test')
         self.assertListEqual(downloader.supplemented_keywords, ['1', '2', '3'])
 
-
+        downloader.driver.quit()
