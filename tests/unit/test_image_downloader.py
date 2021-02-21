@@ -20,6 +20,8 @@ class ImageDownloaderTest(TestCase):
 
     def tearDown(self):
         if hasattr(self.image_downloader, 'driver'):
+            print('closing driver')
+            self.image_downloader.driver.close()
             self.image_downloader.driver.quit()
 
     def _standard_image_downloader(self):
@@ -68,3 +70,11 @@ class ImageDownloaderTest(TestCase):
             image_downloader._download_images()
             self.assertEqual(expected_n_calls, mock_get_link.call_count,
                              'Incorrect number of calls to _get_link()')
+            image_downloader.driver.quit()
+
+    def test_find_and_download(self):
+        self.num_req = 2
+        self.speed = 'fast'
+        image_downloader = self._standard_image_downloader()
+        image_downloader.find_and_download()
+        image_downloader.driver.quit()
