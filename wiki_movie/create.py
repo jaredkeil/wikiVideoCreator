@@ -8,7 +8,6 @@ import wikipediaapi
 
 from movie_maker import WikiMovie
 
-
 # Initialize API
 WikiAPI = wikipediaapi.Wikipedia('en')
 
@@ -29,20 +28,20 @@ def upload_to_youtube(movie):
 
     # keywords = '","'.join(movie.page.categories)  #buggy
 
-    p = Path(__file__).parents[0].resolve() # finds directory containing this file
+    p = Path(__file__).parents[0].resolve()  # finds directory containing this file
 
-    py_file = str(p / 'upload_video.py') # should be in same directory as this file
+    py_file = str(p / 'upload_video.py')  # should be in same directory as this file
 
     mtitle = movie.title.title()
 
     arglist = ['python', py_file,
-            f'--file={movie.vidpath}',
-            f'--title={mtitle}',
-            f'--description={movie.page.summary}',
-            f'--keywords=',
-            '--category=27',
-            '--privacyStatus=public',
-            '--noauth_local_webserver']
+               f'--file={movie.vidpath}',
+               f'--title={mtitle}',
+               f'--description={movie.page.summary}',
+               f'--keywords=',
+               '--category=27',
+               '--privacyStatus=public',
+               '--noauth_local_webserver']
     print(arglist)
 
     subprocess.run(arglist)
@@ -60,7 +59,7 @@ def delete_assets(movie):
 
     links_file = movie.url_dir / (movie.title + '.txt')
     asset_paths = [movie.vidpath, links_file]
-    
+
     for asset in asset_paths:
         if asset.exists():
             asset.unlink()
@@ -70,12 +69,14 @@ def delete_assets(movie):
 
 
 def main(opt):
-    if opt.single_page: 
+    if opt.single_page:
         page_list = [WikiAPI.page(opt.single_page)]
-    elif opt.top25: 
+    elif opt.top25:
         page_list = get_top25(opt.n_pages)
-    elif opt.url: 
+    elif opt.url:
         page_list = get_page_list(opt.url, opt.n_pages)
+    else:
+        raise ValueError('Page not created')
 
     for page in page_list:
 
@@ -106,18 +107,19 @@ def main(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='make video and optionally upload via YouTube API.\
                                     default behavior: use top_25 list, do not upload, do not delete assets')
-    
+
     # Required arguments
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-s', '--single_page', help='name of one specific page')
-    group.add_argument('-t','--top25', action='store_true')
+    group.add_argument('-t', '--top25', action='store_true')
     group.add_argument('--url', help='custom URL of Wiki page. Should contain list/table of articles')
-    
+
     # Optional arguments
     parser.add_argument('-u', '--upload', action='store_true', help='upload to YouTube')
     parser.add_argument('-d', '--delete_all', action='store_true', help='delete assets after movie is made')
-    parser.add_argument('-n', '--n_pages', type=int, default=25, help='how many pages to include when processing multiple pages')
-    parser.add_argument('-c', '--cutoff', type=int,  help='number of characters to include from each section')
-    
+    parser.add_argument('-n', '--n_pages', type=int, default=25,
+                        help='how many pages to include when processing multiple pages')
+    parser.add_argument('-c', '--cutoff', type=int, help='number of characters to include from each section')
+
     options = parser.parse_args()
     main(options)

@@ -8,12 +8,19 @@ import random
 import sys
 import time
 
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from apiclient.http import MediaFileUpload
+# OLD
+# from apiclient.discovery import build
+# from apiclient.errors import HttpError
+# from apiclient.http import MediaFileUpload
+
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaFileUpload
+
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
+
 
 # Explicitly tell the underlying HTTP transport library not to retry, since
 # we are handling retry logic ourselves.
@@ -73,7 +80,7 @@ https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
-def get_authenticated_service(args):
+def get_authenticated_service(options):
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE,
                                    scope=YOUTUBE_UPLOAD_SCOPE,
                                    message=MISSING_CLIENT_SECRETS_MESSAGE)
@@ -82,7 +89,7 @@ def get_authenticated_service(args):
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
-        credentials = run_flow(flow, storage, args)
+        credentials = run_flow(flow, storage, options)
 
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
                  http=credentials.authorize(httplib2.Http()))

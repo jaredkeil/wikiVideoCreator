@@ -57,6 +57,9 @@ class WikiMovie:
 
         self.image_downloader = ImageDownloader(**d_args)
 
+        # Video setup
+        self.vid_path = DATA_DIR / 'videos' / f'{title}.mp4'
+
     def make_movie(self, overwrite_images=True, overwrite_speech=True, overwrite_video=True):
         if overwrite_images:
             self.prepare_images()
@@ -73,7 +76,7 @@ class WikiMovie:
         clips = [create_clip(s['title'], self.audio_dir, self.resize_dir, s['level'], bool(s['text']), self.fmt)
                  for s in self.script]
         video = add_outro(clips)
-        save_video(clips=video, path=DATA_DIR / 'videos' / f'{self.title}.mp4')
+        save_video(clips=video, path=self.vid_path)
 
 
 if __name__ == '__main__':
