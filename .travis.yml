@@ -9,6 +9,7 @@ addons:
     - firefox-geckodriver
     - ffmpeg
     - imagemagick
+    - espeak
 install:
 - pip install pipenv pytest
 - pipenv install --skip-lock
