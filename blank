@@ -1,8 +1,0 @@
-blank1
-blank2
-
-line to be deleted:
-
-<policy domain="path" rights="none" pattern="@*" />
-
-end

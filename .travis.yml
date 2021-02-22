@@ -9,14 +9,13 @@ addons:
     - firefox-geckodriver
     - ffmpeg
     - imagemagick
-    - openssl
+install:
+- pip install pipenv pytest
+- pipenv sync
+script: python -m pytest tests/
 before_install:
 - openssl aes-256-cbc -K $encrypted_77644dcdfd96_key -iv $encrypted_77644dcdfd96_iv
   -in upload_video.py-oauth2.json.enc -out wiki_movie/upload_video.py-oauth2.json
   -d
 - openssl aes-256-cbc -K $encrypted_a789e8191f70_key -iv $encrypted_a789e8191f70_iv
   -in client_secrets.json.enc -out wiki_movie/client_secrets.json -d
-install:
-- pip install pipenv pytest
-- pipenv sync
-script: python -m pytest tests/
