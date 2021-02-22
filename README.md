@@ -1,4 +1,6 @@
-# Video Creater From Wikipedia
+[![Build Status](https://www.travis-ci.com/jaredkeil/wikiVideoCreator.svg?branch=master)](https://www.travis-ci.com/jaredkeil/wikiVideoCreator)
+
+# create videos from Wikipedia articles
 
 Turn Wikipedia articles into videos with computer-generated overdubbing, and the option to upload directly to YouTube.
 Includes helpful parsers for Wikipedia API requests, as well as a module for downloading pictures from Google image searches.
