@@ -11,6 +11,7 @@ user-agent = "*"
 soundfile = "*"
 httplib2 = "*"
 oauth2client = "*"
+google-api-python-client = "*"
 apiclient = "*"
 wikipedia-api = "*"
 moviepy = "*"
@@ -19,6 +20,7 @@ setuptools = "*"
 wheel = "*"
 pip = "*"
 opencv-python-headless = "*"
+
 
 [dev-packages]
 pyttsx3 = "*"
