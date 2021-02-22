@@ -1,0 +1,8 @@
+a bunch
+of dumb lines
+
+except for this:
+
+<policy domain="path" rights="none" pattern="@*" />
+
+end
