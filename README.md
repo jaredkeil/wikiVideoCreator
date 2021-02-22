@@ -60,7 +60,7 @@ Or use homebrew.
 ### Python dependencies
 *Recommended: Create and activate a virtual environment before next steps[python venv, conda, pipenv].*
 
-`pipenv install` (recommended) or `pip install -r requirements.txt`
+`pipenv install --skip-lock` (recommended) or `pip install -r requirements.txt`
 
 Optional: Install PyGame, if wanting to run inline previews in notebooks
 
