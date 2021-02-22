@@ -49,13 +49,13 @@ Or use homebrew.
 
     `sudo apt install ghostscript` or `brew install ghostscript`
 
-###[SoundFile](https://pysoundfile.readthedocs.io/en/latest/#installation)
+### [SoundFile](https://pysoundfile.readthedocs.io/en/latest/#installation)
    
 - Linux: `sudo apt-get install libsndfile1-dev`
 - MacOS, Windows: `pip install soundfile`
 
 
-###Python dependencies
+### Python dependencies
 *Recommended: Create and activate a virtual environment before next steps[python venv, conda, pipenv].*
 
 `pipenv install` (recommended) or `pip install -r requirements.txt`
@@ -64,7 +64,8 @@ Optional: Install PyGame, if wanting to run inline previews in notebooks
 
 `pip install pygame`
 
-##Usage
+## Usage
+
 ### Running with python
 
     python run.py -s [Article Title] -n  [narrator name] -o
@@ -90,7 +91,7 @@ Options arguments:
 
  - The first run of `run.py` may prompt on the terminal for a key-code, which will be available in a browser window.
 
-###Narrators
+### Narrators
 
 - sys_tts: Automatically uses the OS built-in speech command
   - MacOSX: NSSS
