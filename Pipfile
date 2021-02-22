@@ -19,12 +19,11 @@ setuptools = "*"
 wheel = "*"
 pip = "*"
 opencv-python-headless = "*"
-
+gtts = "*"
+pyttsx3 = "*"
 
 [dev-packages]
-pyttsx3 = "*"
 pytest = "*"
-gtts = "*"
 
 [requires]
 python_version = "3.9"
