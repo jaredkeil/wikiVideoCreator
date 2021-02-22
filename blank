@@ -1,7 +1,7 @@
-a bunch
-of dumb lines
+blank1
+blank2
 
-except for this:
+line to be deleted:
 
 <policy domain="path" rights="none" pattern="@*" />
 
