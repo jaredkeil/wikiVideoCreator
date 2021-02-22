@@ -7,7 +7,7 @@ from wiki_movie.video import WikiMovie
 
 
 def generate_movie(opt):
-    movie = WikiMovie(opt.single_page)
+    movie = WikiMovie(opt.single_page, narrator_name=opt.narrator)
     movie.make_movie(opt.overwrite, opt.overwrite, opt.overwrite)
     return movie
 
@@ -48,13 +48,15 @@ if __name__ == '__main__':
     group.add_argument('--url', help='custom URL of Wiki page. Should contain list/table of articles')
 
     # Optional arguments
-    parser.add_argument('-u', '--upload', action='store_true', help='upload to YouTube')
-    parser.add_argument('-d', '--delete_all', action='store_true', help='delete assets after movie is made')
-    parser.add_argument('-n', '--n_pages', type=int, default=25,
-                        help='how many pages to include when processing multiple pages')
+    # parser.add_argument('-u', '--upload', action='store_true', help='upload to YouTube')
+    # parser.add_argument('-d', '--delete_all', action='store_true', help='delete assets after movie is made')
+    # parser.add_argument('-n', '--n_pages', type=int, default=25,
+    #                     help='how many pages to include when processing multiple pages')
 
     parser.add_argument('-p', '--private', action='store_true')
     parser.add_argument('-o', '--overwrite', action='store_true')
+    parser.add_argument('-n', '--narrator', default='sys_tts',
+                        help='Possible narrator names: sys_tts, py_tts, google_tts')
 
     options = parser.parse_args()
     main(options)
