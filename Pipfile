@@ -21,6 +21,7 @@ pip = "*"
 opencv-python-headless = "*"
 gtts = "*"
 pyttsx3 = "*"
+lxml = "*"
 
 [dev-packages]
 pytest = "*"
