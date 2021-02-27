@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Author: WuLC
 # @Date:   2017-09-27 23:02:19
-# @Last Modified by:   JUSTINPAULTURNER
-# @Last Modified time: 2020-04-10 08:56:28
-
+# @Last Modified by:   JAREDKEIL
 
 ####################################################################################################################
 # Download images from google with specified keywords for searching
@@ -27,7 +25,11 @@ from urllib.parse import urlparse, quote
 from user_agent import generate_user_agent
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from selenium.common.exceptions import NoSuchAttributeException, ElementNotInteractableException
+from selenium.common.exceptions import NoSuchAttributeException, ElementNotInteractableException, TimeoutException, \
+    ElementClickInterceptedException
+from selenium.webdriver.support.wait import WebDriverWait
+import selenium.webdriver.support.expected_conditions as EC
+from selenium.webdriver.remote.webelement import WebElement
 
 from wiki_movie.image.google_images_locators import GoogleImagesLocators
 from wiki_movie.utils import write_seq_to_file, make_directory, file_len
@@ -74,12 +76,17 @@ class ImageDownloader:
     def _scrape_urls(self, keyword):
         # Perform a google image search and load enough results
         self._search_for_images(keyword)
-        self._show_more_results()
 
         thumbs = self._get_thumbnails()
+        while len(thumbs) < self.num_requested:
+            print(len(thumbs))
+            self._show_more_results()
+            thumbs.update(self._get_thumbnails())
+        print(f'out of loop, {len(thumbs)} thumbnails located.')
 
         # Scrape the urls from thumbnails
-        urls = self._get_urls_from_thumbs(thumbs)
+        urls = self._get_urls_from_thumbs(list(thumbs))
+        print('urls:', urls)
         self.img_urls.update(urls)
 
         # write urls in appropriate text file, named by keyword
@@ -91,50 +98,66 @@ class ImageDownloader:
         self.driver.get("https://www.google.com/search?q=" + formatted_query + "&source=lnms&tbm=isch")
 
     def _show_more_results(self):
-        """Scroll down the page to load more image results."""
-        for _ in range(math.ceil(self.num_requested / 700)):
-            for __ in range(2):
-                self.driver.execute_script("window.scrollBy(0, 1000000)")
-                time.sleep(2)
-            time.sleep(1)
-            try:
-                self.driver.find_element(*GoogleImagesLocators.MORE_RESULTS).click()
-            except ElementNotInteractableException:
-                break
+        """Scroll down the page to load more image results. Click on 'More results' if possible"""
+        try:
+            print('looking for more_results button')
+            more_results_element = WebDriverWait(self.driver, 1).until(
+                EC.element_to_be_clickable(GoogleImagesLocators.MORE_RESULTS))
+            more_results_element.click()
+            # self.driver.find_element(*GoogleImagesLocators.MORE_RESULTS).click()
+        except (TimeoutException, ElementNotInteractableException):
+            print('button not found')
+            pass
+
+        print('before scroll')
+        self.driver.execute_script("window.scrollBy(0, 1000)")
+        print('after scroll')
 
     def _get_thumbnails(self):
-        return self.driver.find_elements(*GoogleImagesLocators.THUMBNAILS)
+        try:
+            thumbnails = WebDriverWait(self.driver, 10).until(
+                n_elements_clickable(GoogleImagesLocators.THUMBNAILS, self.num_requested)
+            )
+            return set(thumbnails)
+        except TimeoutException:
+            return set()
 
     def _get_urls_from_thumbs(self, thumbs):
+        print('getting urls . . .')
         urls = set()
         for i, t in enumerate(thumbs[:self.num_requested]):
+            print(i)
             sys.stdout.write(f"Finding URL's [{'#' * (i + 1) + ' ' * (self.num_requested - i - 1)}]   \r")
             sys.stdout.flush()
-            urls.update(self._extract_url_from_thumb(t))
+            urls.update(self._extract_src_from_thumb(t))
         return urls
 
-    def _extract_url_from_thumb(self, thumb):
+    def _extract_src_from_thumb(self, thumb):
         try:
-            thumb.click()
-            time.sleep(self.wait_time)
-        except ElementNotInteractableException:
-            print("Error clicking one thumbnail")
+            WebDriverWait(self.driver, self.wait_time).until(element_is_clickable(thumb)).click()
+        except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException) as e:
+            print("Error clicking one thumbnail", e)
 
-        src_urls = set()
-        for el in self.driver.find_elements(*GoogleImagesLocators.URLS_IN_THUMBS):
-            try:
-                url = el.get_attribute('src')
-                if url.startswith('http') and not url.startswith('https://encrypted-tbn0.gstatic.com'):
-                    src_urls.add(url)
-            except NoSuchAttributeException:
-                print("Error getting one url")
-        return src_urls
+        try:
+            el = WebDriverWait(self.driver, self.wait_time).until(
+                EC.visibility_of_element_located(*GoogleImagesLocators.URLS_IN_THUMBS))
+            src = el.get_attribute('src')
+            if src.startswith('http') and not src.startswith('https://encrypted-tbn0.gstatic.com'):
+                return {src}
+        except TimeoutException as e:
+            print(e)
+            print("Timeout Error getting one url")
+        except NoSuchAttributeException as e:
+            print(e)
+            print('NoSuchAttributeException')
+        finally:
+            return set()
 
     def _define_link_file_path(self, keyword):
         if keyword == " ":
-            return self.url_dir / f"{self.main_keyword + '/' + self.main_keyword}.txt"
+            return self.url_dir / f"{self.main_keyword}.txt"
         else:
-            return self.url_dir / f"{self.main_keyword + '/' + keyword}.txt"
+            return self.url_dir / f"{keyword}.txt"
 
     def _define_supp_img_dir(self, keyword):
         if keyword == " ":
@@ -144,7 +167,6 @@ class ImageDownloader:
 
     def _create_directories(self):
         make_directory(self.url_dir)
-        make_directory(self.mk_url_dir)
 
     def _download_images(self):
         """download images whose links are in the link file"""
@@ -198,3 +220,33 @@ class ImageDownloader:
         }
         req = urllib.request.Request(url.strip(), headers=headers)
         return urllib.request.urlopen(req, timeout=10)
+
+
+class n_elements_clickable:
+    """
+    Expected condition to check whether there are a certain number of elements found by the locator
+    """
+    def __init__(self, locator, n):
+        self.locator = locator
+        self.n = n
+
+    def __call__(self, driver):
+        elements = driver.find_elements(*self.locator)
+        if len(elements) >= self.n:
+            return elements
+        else:
+            return False
+
+
+class element_is_clickable:
+    """
+    Expected condition which accepts an element rather than a locator
+    """
+    def __init__(self, element: WebElement):
+        self.element = element
+
+    def __call__(self, driver):
+        if self.element.is_displayed() and self.element.is_enabled():
+            return self.element
+        else:
+            return False

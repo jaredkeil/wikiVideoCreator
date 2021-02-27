@@ -1,4 +1,6 @@
 from unittest import TestCase, skipIf
+import pytest
+
 from unittest.mock import patch
 import os
 
@@ -10,10 +12,10 @@ class ImageDownloaderTest(TestCase):
     def setUp(self):
         self.main_keyword = 'python'
         self.supp_list = ['small', 'big', 'red']
-        data_dir = repository_root / 'tests' / 'data'
-        self.url_dir = data_dir / 'url_files'
-        self.img_dir = data_dir / 'images' / self.main_keyword
-        self.num_req = 10
+        self.data_dir = repository_root / 'tests' / 'data'
+        self.url_dir = self.data_dir / 'url_files' / self.main_keyword
+        self.img_dir = self.data_dir / 'images' / self.main_keyword
+        self.num_req = 3
         self.speed = 'medium'
         self.headless = True
         self.image_downloader = None
@@ -33,7 +35,7 @@ class ImageDownloaderTest(TestCase):
                                self.speed,
                                self.headless)
 
-    @skipIf(os.environ.get('DISPLAY') is None, 'DISPLAY not configured')
+    @skipIf(os.environ.get('DISPLAY') is None, '$DISPLAY not configured')
     def test_non_headless(self):
         self.headless = False
         self.image_downloader = self._standard_image_downloader()
@@ -49,12 +51,18 @@ class ImageDownloaderTest(TestCase):
         keyword = self.supp_list[0]
         self.image_downloader._search_for_images(keyword=keyword)
 
+    @pytest.mark.slow
     def test_get_image_links(self):
-        self.num_req = 2
+        self.num_req = 10
+        self.headless = True
+        self.speed = 'medium'
         self.image_downloader = self._standard_image_downloader()
+
+        self.assertEqual(1, self.image_downloader.wait_time)
+
         self.image_downloader._get_image_links()
 
-        n_link = len(os.listdir(self.image_downloader.mk_url_dir))
+        n_link = len(list(self.image_downloader.url_dir.glob('*.txt')))
         self.assertEqual(n_link, len(self.supp_list),
                          'Incorrect number of url text files created.')
 
@@ -63,15 +71,17 @@ class ImageDownloaderTest(TestCase):
         self.num_req = 2
         self.main_keyword = 'test'
         self.supp_list = ['1', '2']
+        self.url_dir = self.data_dir / 'url_files' / self.main_keyword
         image_downloader = self._standard_image_downloader()
 
-        expected_n_calls = sum(file_len(x) for x in image_downloader.mk_url_dir.glob('*.txt'))
+        expected_n_calls = sum(file_len(x) for x in image_downloader.url_dir.glob('*.txt'))
         with patch.object(image_downloader, '_get_link', return_value=None) as mock_get_link:
             image_downloader._download_images()
             self.assertEqual(expected_n_calls, mock_get_link.call_count,
                              'Incorrect number of calls to _get_link()')
             image_downloader.driver.quit()
 
+    # slow
     def test_find_and_download(self):
         self.num_req = 2
         self.speed = 'fast'
