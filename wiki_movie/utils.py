@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import shutil
 import time
 import importlib.util
 import sys
@@ -71,6 +72,20 @@ def add_extension(path, suffix):
 def change_extension(path, new_extension):
     root, _ = os.path.splitext(path)
     return root + '.' + new_extension
+
+
+def rm_directory(directory):
+    # Remove directory and all it's contents, including sub-directories and files
+    try:
+        shutil.rmtree(directory)
+    except FileNotFoundError:
+        print(f'Tried deleting {directory}, but was not found.')
+
+
+def rm_file(file_path):
+    # Delete file if path is found. Does not raise error if path not found
+    if file_path.exists():
+        file_path.unlink()
 
 
 def conditional_import(name):
