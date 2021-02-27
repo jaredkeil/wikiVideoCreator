@@ -401,7 +401,7 @@ class WikiMovie:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Make movie from wikipedia article. Usage: python test_upload.py <filepath>")
+        description="Make movie from wikipedia article. Usage: python movie_maker.py [Article title] [filepath]")
     parser.add_argument('name', default='Tarball', nargs='+')
     parser.add_argument('--mode',
                         default='gtts',
