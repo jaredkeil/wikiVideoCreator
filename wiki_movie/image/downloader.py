@@ -16,7 +16,6 @@ import os
 from pathlib import Path
 import sys
 import time
-import math
 import logging
 import urllib.request
 import urllib.error
@@ -44,8 +43,8 @@ class ImageDownloader:
             supplemented_keywords (list[str]): list of supplemented keywords
             url_dir (Path): parent directory where the url.txt files are stored to folder called <main_keyword>
             img_dir (Path): parent directory where images will be downloaded to folder called <main_keyword>
-            num_requested (int, optional): maximum number of images to download
-            connection_speed (str, optional): 'very slow', 'slow', 'medium', 'fast', or 'very fast'
+            num_requested (int): maximum number of images to download
+            connection_speed (str): 'very slow', 'slow', 'medium', 'fast', or 'very fast'
         """
         self.main_keyword = main_keyword
         self.supplemented_keywords = supplemented_keywords
@@ -89,8 +88,10 @@ class ImageDownloader:
         # write urls in appropriate text file, named by keyword
         link_file_path = self._define_link_file_path(keyword)
         write_seq_to_file(urls, link_file_path)
+        print(f"Wrote {len(urls)} links to {link_file_path}\n")
 
     def _search_for_images(self, keyword):
+        print(f'Performing image search for "{self.main_keyword + " " + keyword}"')
         formatted_query = quote(self.main_keyword + ' ' + keyword)
         self.driver.get("https://www.google.com/search?q=" + formatted_query + "&source=lnms&tbm=isch")
 
@@ -117,11 +118,16 @@ class ImageDownloader:
 
     def _get_urls_from_thumbs(self, thumbs):
         urls = set()
+        n_found = 0
         i = 0
         while len(urls) < self.num_requested and i < len(thumbs):
-            # sys.stdout.write(f"Finding URL's [{'#' * (i + 1) + ' ' * (self.num_requested - i - 1)}]   \r")
-            # sys.stdout.flush()
-            urls.update(self._extract_src_from_thumb(thumbs[i]))
+            # print(f"Finding URL's [{'#' * (n_found + 1) + ' ' * (self.num_requested - n_found)}]   \r")
+            sys.stdout.write(f"Finding {self.num_requested} URL's [{'#' * n_found + ' ' * (self.num_requested - n_found)}]   \r")
+            sys.stdout.flush()
+            src = self._extract_src_from_thumb(thumbs[i])
+            if src:
+                urls.update(src)
+                n_found += 1
             i += 1
         return urls
 
@@ -169,22 +175,22 @@ class ImageDownloader:
             self._download_image_from_keyword(keyword)
 
             downloaded_num = len(os.listdir(sk_img_dir))
-            print(f"\nSuccessfully downloaded {downloaded_num} images for keyword '{keyword}'.")
+            print(f"\nSuccessfully downloaded {downloaded_num} images for search '{self.main_keyword + ' ' + keyword}'.\n")
 
     def _download_image_from_keyword(self, keyword):
         """
         Reads urls from '{keyword}.txt', and downloads to images/main_keyword/supp_keyword/ directory
         """
-        print(f"starting download of images inside directory {keyword}")
+        print(f"Downloading path: {self._define_supp_img_dir(keyword)}")
 
         link_file_path = self._define_link_file_path(keyword)
         n_links = file_len(link_file_path)
 
         with link_file_path.open('r') as rf:
             for i, link in enumerate(rf.readlines()):
-                print(link)
+                # print(link)
                 sys.stdout.write(
-                    f"Downloading images [{'#' * (i + 1) + ' ' * (n_links - i - 1)}]   \r")
+                    f"Downloading {n_links} images [{'#' * (i + 1) + ' ' * (n_links - i - 1)}]   \r")
                 sys.stdout.flush()
                 self._get_link(link, keyword)
 
@@ -245,3 +251,21 @@ class element_is_clickable:
             return self.element
         else:
             return False
+
+
+if __name__ == '__main__':
+    from wiki_movie.utils import repository_root
+
+    kw = 'Test'
+    s_kw = [' ', 'Hello', 'There']
+
+    data_dir = repository_root / 'data'
+    txt_dir = data_dir / 'url_files' / kw
+    img_dir = data_dir / 'images' / kw
+
+    image_downloader = ImageDownloader(main_keyword=kw,
+                                       supplemented_keywords=s_kw,
+                                       url_dir=txt_dir,
+                                       img_dir=img_dir)
+
+    image_downloader.find_and_download()
