@@ -79,14 +79,11 @@ class ImageDownloader:
 
         thumbs = self._get_thumbnails()
         while len(thumbs) < self.num_requested:
-            print(len(thumbs))
             self._show_more_results()
             thumbs.update(self._get_thumbnails())
-        print(f'out of loop, {len(thumbs)} thumbnails located.')
 
-        # Scrape the urls from thumbnails
+        # Scrape the 'src' attribute as a url from from thumbnails
         urls = self._get_urls_from_thumbs(list(thumbs))
-        print('urls:', urls)
         self.img_urls.update(urls)
 
         # write urls in appropriate text file, named by keyword
@@ -100,18 +97,14 @@ class ImageDownloader:
     def _show_more_results(self):
         """Scroll down the page to load more image results. Click on 'More results' if possible"""
         try:
-            print('looking for more_results button')
             more_results_element = WebDriverWait(self.driver, 1).until(
                 EC.element_to_be_clickable(GoogleImagesLocators.MORE_RESULTS))
             more_results_element.click()
-            # self.driver.find_element(*GoogleImagesLocators.MORE_RESULTS).click()
         except (TimeoutException, ElementNotInteractableException):
-            print('button not found')
             pass
 
-        print('before scroll')
+        # Scroll
         self.driver.execute_script("window.scrollBy(0, 1000)")
-        print('after scroll')
 
     def _get_thumbnails(self):
         try:
@@ -123,35 +116,31 @@ class ImageDownloader:
             return set()
 
     def _get_urls_from_thumbs(self, thumbs):
-        print('getting urls . . .')
         urls = set()
-        for i, t in enumerate(thumbs[:self.num_requested]):
-            print(i)
-            sys.stdout.write(f"Finding URL's [{'#' * (i + 1) + ' ' * (self.num_requested - i - 1)}]   \r")
-            sys.stdout.flush()
-            urls.update(self._extract_src_from_thumb(t))
+        i = 0
+        while len(urls) < self.num_requested and i < len(thumbs):
+            # sys.stdout.write(f"Finding URL's [{'#' * (i + 1) + ' ' * (self.num_requested - i - 1)}]   \r")
+            # sys.stdout.flush()
+            urls.update(self._extract_src_from_thumb(thumbs[i]))
+            i += 1
         return urls
 
     def _extract_src_from_thumb(self, thumb):
         try:
             WebDriverWait(self.driver, self.wait_time).until(element_is_clickable(thumb)).click()
         except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException) as e:
-            print("Error clicking one thumbnail", e)
+            pass
 
         try:
-            el = WebDriverWait(self.driver, self.wait_time).until(
-                EC.visibility_of_element_located(*GoogleImagesLocators.URLS_IN_THUMBS))
+            elements = self.driver.find_elements(*GoogleImagesLocators.URLS_IN_THUMBS)
+            el = WebDriverWait(self.driver, self.wait_time).until(element_is_clickable(elements[1]))
             src = el.get_attribute('src')
             if src.startswith('http') and not src.startswith('https://encrypted-tbn0.gstatic.com'):
                 return {src}
-        except TimeoutException as e:
-            print(e)
-            print("Timeout Error getting one url")
-        except NoSuchAttributeException as e:
-            print(e)
-            print('NoSuchAttributeException')
-        finally:
-            return set()
+        except (IndexError, Exception) as e:
+            pass
+
+        return set()
 
     def _define_link_file_path(self, keyword):
         if keyword == " ":
@@ -174,13 +163,18 @@ class ImageDownloader:
         for keyword in self.supplemented_keywords:
             sk_img_dir = self._define_supp_img_dir(keyword)
             make_directory(sk_img_dir)
+
             self.img_path = 0
+
             self._download_image_from_keyword(keyword)
 
-            downloaded_num = os.stat(sk_img_dir).st_nlink
+            downloaded_num = len(os.listdir(sk_img_dir))
             print(f"\nSuccessfully downloaded {downloaded_num} images for keyword '{keyword}'.")
 
     def _download_image_from_keyword(self, keyword):
+        """
+        Reads urls from '{keyword}.txt', and downloads to images/main_keyword/supp_keyword/ directory
+        """
         print(f"starting download of images inside directory {keyword}")
 
         link_file_path = self._define_link_file_path(keyword)
@@ -246,7 +240,8 @@ class element_is_clickable:
         self.element = element
 
     def __call__(self, driver):
-        if self.element.is_displayed() and self.element.is_enabled():
+        # if self.element.is_displayed() and self.element.is_enabled():
+        if self.element.is_displayed():
             return self.element
         else:
             return False
