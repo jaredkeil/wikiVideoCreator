@@ -8,7 +8,9 @@ def generate_section_dictionaries_list(page):
     page (wikipediaapia.WikipediaPage)
     """
     script = [{'title': page.title, 'level': 0, 'text': remove_stopwords(page.summary)}]
+    print('Excluding sections: ', end='')
     flush_sections(script, page.sections)
+    print('')
     return script
 
 
@@ -22,7 +24,7 @@ def flush_sections(script, sections, level=0):
     """
     for s in sections:
         if s.title in EXCLUDED_SECTIONS:
-            print('excluding', s.title)
+            print(f'{s.title},', end=' ')
             continue
         else:
             script.append({'title': s.title, 'level': level + 1, 'text': remove_stopwords(s.text)})
