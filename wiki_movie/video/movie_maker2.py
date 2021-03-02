@@ -17,7 +17,7 @@ NARRATOR_FMTS = {'sys_tts': PLATFORM_AUDIO_EXT, 'py_tts': PLATFORM_AUDIO_EXT,
 
 
 class WikiMovie:
-    def __init__(self, title, narrator_name=None, narrator_args=None, downloader_args=None, ):
+    def __init__(self, title, narrator_name=None, narrator_args=None, downloader_args=None):
         """
         Initialization parses response of wikipedia api into a readable script for narrator,
         then initializes narrator and image downloader.
@@ -140,5 +140,4 @@ if __name__ == '__main__':
 
     print(options)
 
-    print(vars(options))
-    # w_movie = WikiMovie('Condyle')
+    main(options)
