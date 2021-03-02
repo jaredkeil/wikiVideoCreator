@@ -68,38 +68,72 @@ Optional: Install PyGame, if wanting to run inline previews in notebooks
 
 ## Usage
 
-### Running with python
 
-    python run.py -s [Article Title] -n  [narrator name] -o
+**Note:** To be able to upload to a YouTube account, you must first obtain a client_secrets.json file for the YouTube API,
+ and store it in the wiki_movie/ directory.
+See [Obtaining authorization credentials](https://developers.google.com/youtube/registering_an_application).
 
-Before running, you must obtain a client_secrets.json file for the YouTube API, and store it in the wiki_movie directory.
+
+
+### Command Line
+
+    python main.py [-s [Article Title]  | ]-n  [narrator name] -o
 
 
 Example
 
-    python run.py -s Boston -n py_tts -o
+    python main.py -s Boston -n py_tts -o
+    
+    python main.py --top25
+
+    python main.py --url https://en.wikipedia.org/wiki/Wikipedia:Top_25_Report/February_7_to_13,_2021
 
 Required arguments:
 
+    [-s | -t | --url]
     -s --single_page      Title of the article to process
+    -t --top25            Use the top25 articles of the week
+    --url                 URL of an article, which must contain a list/table of articles            
 
-Options arguments:
+
+Optional arguments:
 
 | Parameter                 | Default       | Description   |
 | :------------------------ |:-------------:| :-------------|
-| -n --narrator   |  sys_tts  | Speech generation engine. Accepted values: py_tts, google_tts, dc_tts |
+| -n --narrator   |  sys_tts  | Speech generation engine (string). Accepted values: py_tts, google_tts, dc_tts |
 | -o --overwrite  | True      | Flag, which if set, will overwrite any data of an article of the same name |
+| -u --upload     | False     | Flag, upload created video to Youtube |
+| -p --private    | False     | Flag, upload with 'private' viewing status |
+| -d --delete_all | False     | Flag, delete assets(images, audio) after movie is created |
+| --n_pages       | 25        | Integer, use with --url arg. Sets limit on number of article links to process from --url.
+
+Narrator arguments:
+
+So far, only arguments for the SystemNarrator have been implemented for the command line.
+
+| Parameter                 | Default       | Description   |
+| :------------------------ |:-------------:| :-------------|
+| -v, --voice   | MacOS: Alex, Linux: na | narrator voice - available voices dependant on platform |
+| -r --rate     | MacOS: 200, Linux: na | words spoken per minute |
+
+ImageDownloader object arguments:
+
+| Parameter                 | Default       | Description   |
+| :------------------------ |:-------------:| :-------------|
+| -i, --image_count         | 5             | Number of images to loop per article section |
+| -c, connect_speed         | 'medium'      | How quickly to timeout scraping search results page |
+| -w, --watch               | False         | Flag, run browser in non-headless mode |
 
 
- - The first run of `run.py` may prompt on the terminal for a key-code, which will be available in a browser window.
 
-### Narrators
+ - The first run of `main.py` may prompt on the terminal for a key-code, which will be available in a browser window.
+
+#### Description of available Narrators
 
 - sys_tts: Automatically uses the OS built-in speech command
-  - MacOSX: NSSS
+  - MacOSX: NS Speech Synthesizer
   - Linux: espeak
   - Windows: not implemented
 - py_tts: Uses pyttsx3
 - google_tts: Uses gTTS
 - dc_tts: Deep Convolutional TTS
-
