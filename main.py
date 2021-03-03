@@ -39,7 +39,7 @@ def main(args):
             movie = WikiMovie(title, args.narrator, parse_narrator_args(args), parse_downloader_args(args))
 
             movie.image_downloader.driver.quit()
-            movie.make_movie(args.overwrite, args.overwrite, args.overwrite)
+            movie.make_movie(args.overwrite)
 
             if args.upload:
                 upload(movie.vid_path, movie.script[0]['title'], movie.script[0]['text'], args.private)
@@ -85,4 +85,4 @@ if __name__ == '__main__':
 
     options = parser.parse_args()
     print(options)
-    main(options)
+    # main(options)

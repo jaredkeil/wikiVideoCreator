@@ -23,7 +23,7 @@ def upload_to_youtube(filepath):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Upload videos to youtube. Usage: python test_upload.py <filepath>')
+    parser = argparse.ArgumentParser(description='Upload videos to youtube. Usage: python simple_upload.py <filepath>')
     parser.add_argument('filepath')
     opt = parser.parse_args()
 

@@ -17,6 +17,10 @@ NARRATOR_FMTS = {'sys_tts': PLATFORM_AUDIO_EXT, 'py_tts': PLATFORM_AUDIO_EXT,
 
 
 class WikiMovie:
+    """
+    Make movies in mp4 from wikipedia pages.
+    """
+
     def __init__(self, title, narrator_name=None, narrator_args=None, downloader_args=None):
         """
         Initialization parses response of wikipedia api into a readable script for narrator,
@@ -63,13 +67,13 @@ class WikiMovie:
         # Video setup
         self.vid_path = DATA_DIR / 'videos' / f'{title}.mp4'
 
-    def make_movie(self, overwrite_images=True, overwrite_speech=True, overwrite_video=True):
-        if overwrite_images:
+    def make_movie(self, overwrite=True):
+        if overwrite:
             self.prepare_images()
-        if overwrite_speech:
             self.narrator.make_narration(self.audio_dir)
-        if overwrite_video:
             self.slideshow()
+        else:
+            print("Overwrite was set to False - No movie created.")
 
     def prepare_images(self):
         self.image_downloader.find_and_download()
@@ -133,7 +137,7 @@ if __name__ == '__main__':
     img_dl_args = parser.add_argument_group('image downloader arguments (optional)')
     img_dl_args.add_argument('-i', '--image_count', type=int, help='how many images per section')
     img_dl_args.add_argument('-c', '--connect_speed', choices=('very slow', 'slow', 'medium', 'fast', 'very fast'),
-                                 help='how fast the webdriver clicks on search results')
+                             help='how fast the webdriver clicks on search results')
     img_dl_args.add_argument('-w', '--watch', action='store_true', help='run browser in non-headless mode')
 
     options = parser.parse_args(['hello', '-v', 'somevoice', '-i', '10'])
