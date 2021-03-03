@@ -77,10 +77,12 @@ See [Obtaining authorization credentials](https://developers.google.com/youtube/
 
 ### Command Line
 
-    python main.py [-s [Article Title]  | ]-n  [narrator name] -o
+##### Simple usage:
+
+    python main.py [-s SINGLE_PAGE  | -t | --url URL] -o
 
 
-Example
+##### Examples:
 
     python main.py -s Boston -n py_tts -o
     
@@ -128,7 +130,7 @@ ImageDownloader object arguments:
 
  - The first run of `main.py` may prompt on the terminal for a key-code, which will be available in a browser window.
 
-#### Description of available Narrators
+#### Description of available narrator arguments
 
 - sys_tts: Automatically uses the OS built-in speech command
   - MacOSX: NS Speech Synthesizer
