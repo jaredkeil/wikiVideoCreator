@@ -28,9 +28,13 @@ class WikiMovieTest(TestCase):
     @mock.patch('sys.platform', 'linux')
     def test_linux_format(self):
         w_movie = WikiMovie('Condyle', 'sys_tts')
+
+        # Mocked methods to increase speed of test. Only care about correct call to default linux narration engine
+        w_movie.prepare_images = mock.MagicMock(name='prepare_images')
+        w_movie.slideshow = mock.MagicMock(name='slideshow')
+
         with mock.patch('wiki_movie.narrators.engines.sys_tts.save_linux') as mock_save_linux:
-            w_movie.make_movie(overwrite=False)
-            print(mock_save_linux.call_args_list)
+            w_movie.make_movie()
 
             expected_file_name = str(DATA_DIR / 'audio' / 'Condyle' / 'Condyle_header')
 
