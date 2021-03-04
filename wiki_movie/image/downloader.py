@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Author: WuLC
-# @Date:   2017-09-27 23:02:19
-# @Last Modified by:   JAREDKEIL
-
 ####################################################################################################################
 # Download images from google with specified keywords for searching
 # search query is created by "main_keyword + supplemented_keyword"
@@ -35,7 +30,7 @@ from wiki_movie.utils import write_seq_to_file, make_directory, file_len
 
 
 class ImageDownloader:
-    def __init__(self, main_keyword, supplemented_keywords, url_dir, img_dir,
+    def __init__(self, main_keyword, supplemented_keywords=None, url_dir=None, img_dir=None,
                  num_requested=5, connection_speed="medium", headless=True):
         """
         Args:
@@ -47,10 +42,9 @@ class ImageDownloader:
             connection_speed (str): 'very slow', 'slow', 'medium', 'fast', or 'very fast'
         """
         self.main_keyword = main_keyword
-        self.supplemented_keywords = supplemented_keywords
-        self.url_dir = url_dir
-        self.mk_url_dir = url_dir / main_keyword
-        self.img_dir = img_dir
+        self.supplemented_keywords = supplemented_keywords if supplemented_keywords else []
+        self.url_dir = url_dir if url_dir else Path.cwd() / 'data' / 'url_files'
+        self.img_dir = img_dir if img_dir else Path.cwd() / 'data' / 'images' / main_keyword
         self.num_requested = num_requested
         self.wait_time = {'very slow': 7, 'slow': 3, 'medium': 1, 'fast': 0.5, 'very fast': .25}.get(connection_speed, 1)
         self.headless = headless
@@ -261,11 +255,11 @@ if __name__ == '__main__':
 
     data_dir = repository_root / 'data'
     txt_dir = data_dir / 'url_files' / kw
-    img_dir = data_dir / 'images' / kw
+    images_dir = data_dir / 'images' / kw
 
     image_downloader = ImageDownloader(main_keyword=kw,
                                        supplemented_keywords=s_kw,
                                        url_dir=txt_dir,
-                                       img_dir=img_dir)
+                                       img_dir=images_dir)
 
     image_downloader.find_and_download()
