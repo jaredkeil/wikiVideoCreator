@@ -1,70 +1,36 @@
-[![Build Status](https://www.travis-ci.com/jaredkeil/wikiVideoCreator.svg?branch=master)](https://www.travis-ci.com/jaredkeil/wikiVideoCreator)
-
 # create videos from Wikipedia articles
 
 Turn Wikipedia articles into videos with computer-generated overdubbing, and the option to upload directly to YouTube.
 Includes helpful parsers for Wikipedia API requests, as well as a module for downloading pictures from Google image searches.
 
+[![Build Status](https://www.travis-ci.com/jaredkeil/wikiVideoCreator.svg?branch=master)](https://www.travis-ci.com/jaredkeil/wikiVideoCreator)
+
 ## Installation:
 
-### Firefox, geckodriver:
+*Required: Firefox, Geckodriver, Imagemagick, Ghostscript, Python>=3.9*
 
-`sudo apt install firefox`
+**Linux:**
 
-`sudo apt-get install firefox-geckodriver`
+```
+sudo apt-get install firefox firefox-geckodriver imagemagick ghostscript libsndfile1-dev espeak
+```
 
-Or use homebrew.
+**Homebrew:**
 
-`brew install --cask firefox'
-`brew install geckodriver`
-
-(Selenium installs with python dependencies in requirements.txt)
-
-
-### [ImageMagick](https://imagemagick.org/script/download.php), and [Ghostscript](https://www.ghostscript.com/doc/9.53.3/Install.htm):
-    
-
-  `sudo apt install imagemagick` or `brew install imagemagick`
-
-  Note, because of issue with MoviePy, you may need to alter the policy.xml file of ImageMagick (see [this issue](https://github.com/Zulko/moviepy/issues/401#issuecomment-278679961)). To find where the file is located, run:
-  
-  `convert -list policy`
-
-  The top line of the output should look like
-  `Path: /etc/ImageMagick-6/policy.xml`
-
-  If instead it is `Path: [built-in]`, then no changes may be necessary.
-  
-  Edit line 88, or whichever line the policy refers to the "path" domain, to allow rights for read and write.
-  
-  `sudo nano /etc/ImageMagick-6/policy.xml`
-
-  Original:
-  
-  `<policy domain="path" rights="none" pattern="@*"/>`
-
-  Change:
-
-  `<policy domain="path" rights="read | write" pattern="@*"/>`
-
-- Ghostscript:
-
-    `sudo apt install ghostscript` or `brew install ghostscript`
-
-### [SoundFile](https://pysoundfile.readthedocs.io/en/latest/#installation)
-   
-- Linux: `sudo apt-get install libsndfile1-dev`
-- MacOS, Windows: `pip install soundfile`
+```
+brew install --cask firefox; brew install geckodriver imagemagick ghostscript
+```
 
 
-### Python dependencies
-*Recommended: Create and activate a virtual environment before next steps[python venv, conda, pipenv].*
+
+### Python dependencies/environment
+Create and activate a virtual environment before next steps, such as venv, conda, pipenv.
 
 `pipenv install --skip-lock` (recommended) or `pip install -r requirements.txt`
 
-Optional: Install PyGame, if wanting to run inline previews in notebooks
+Optional: `pip install pygame`, if you want to run in-line video previews in jupyter notebooks
 
-`pip install pygame`
+
 
 ## Usage
 
@@ -79,21 +45,21 @@ See [Obtaining authorization credentials](https://developers.google.com/youtube/
 
 ##### Simple usage:
 
-    python main.py [-s SINGLE_PAGE  | -t | --url URL] -o
+    python main.py (-s SINGLE_PAGE | -t | --url URL) -o
 
 
 ##### Examples:
 
-    python main.py -s Boston -n py_tts -o
+    python main.py -s Computer Science --narrator py_tts -o
     
-    python main.py --top25
+    python main.py --top25 --voice Alex --rate 250 --overwrite --upload
 
     python main.py --url https://en.wikipedia.org/wiki/Wikipedia:Top_25_Report/February_7_to_13,_2021
 
 Required arguments:
 
     [-s | -t | --url]
-    -s --single_page      Title of the article to process
+    -s --single_page      Title of the article to process (ok to have spaces in title)
     -t --top25            Use the top25 articles of the week
     --url                 URL of an article, which must contain a list/table of articles            
 
@@ -139,3 +105,67 @@ ImageDownloader object arguments:
 - py_tts: Uses pyttsx3
 - google_tts: Uses gTTS
 - dc_tts: Deep Convolutional TTS
+
+### Python
+
+```python
+import wiki_movie
+movie = wiki_movie.WikiMovie("Computer Science")
+movie.make_movie()
+```
+
+**Standalone ImageDownloader, for scraping google image searches**
+```python
+from wiki_movie.image import ImageDownloader
+downloader = ImageDownloader('Python', num_requested=100)
+downloader.find_and_download()
+```
+
+Optionally add list of search terms to combine with the main keyword.
+
+```python
+from wiki_movie.image import ImageDownloader
+downloader = ImageDownloader('Python', ['big', 'small', 'green'])
+# A search will be run for each: 'Python big', 'Python small', 'Python green'
+downloader.find_and_download()
+```
+
+
+### *Possible ImageMagick/MoviePy issue:* 
+
+On some systems, an issue arises with MoviePy's use of ImageMagick, 
+and you may need to alter the `policy.xlm` file of [ImageMagick](https://imagemagick.org/script/download.php) 
+(see [this issue](https://github.com/Zulko/moviepy/issues/401#issuecomment-278679961)). 
+
+Steps to fix:
+
+1. Find the location of the ImageMagick policy file: 
+   
+    - `convert -list policy`
+   
+    - The top line of the output should look like `Path: /etc/ImageMagick-6/policy.xml`
+   
+    - If instead you see `Path: [built-in]`, then no changes may be necessary.
+  
+2. Edit the line of the policy file which refers to the "path" domain, to allow rights for read and write. 
+   
+    - `sudo nano /etc/ImageMagick-6/policy.xml`
+
+    - Original:
+      ```xml 
+      <policy domain="path" rights="none" pattern="@*"/>
+      ```
+
+    - Edited:
+      ```xml
+      <policy domain="path" rights="read | write" pattern="@*"/>
+      ```
+
+
+## References:
+
+* [ImageMagick](https://imagemagick.org/script/download.php)
+* [Ghostscript](https://www.ghostscript.com/doc/9.53.3/Install.htm)
+* [MoviePy](https://zulko.github.io/moviepy/)
+* [Wikipedia-API (python)](https://github.com/martin-majlis/Wikipedia-API)
+* [pyttsx3](https://github.com/nateshmbhat/pyttsx3)
