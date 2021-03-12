@@ -10,6 +10,8 @@ class GoogleImagesLocators:
     @staticmethod
     def fmt_image_search_url(query):
         """
-        Return image search url (str) with appropriate formatting applied to query (str).
+        Format query string into url for google image search.
         """
-        return "https://www.google.com/search?q=" + quote(query) + "&source=lnms&tbm=isch"
+        return "https://www.google.com/search?q=" + \
+               quote(query) + \
+               "&source=lnms&tbm=isch"
