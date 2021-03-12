@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 import shutil
 import time
-import importlib.util
 import sys
 
 
@@ -31,19 +30,24 @@ def make_directory(directory):
 
 
 def file_len(file_name):
+    """
+    Returns number of lines in text-like file_name
+    """
     i = 0
     with open(file_name) as f:
         for _ in f:
             i += 1
-    return i  # i will be the index of the last line. 1 is added to account for the folder of resized images.
+    return i
 
 
 def localtime_filepath(directory, extension):
     """
+    Generates a filepath of current local time, with given extension.
+
     directory -- Path
     extension -- str
 
-    return -- str
+    Returns -- str
     """
     formatted_current_time = time.strftime('%H.%M.%S', time.localtime())
     return str(directory / str(formatted_current_time + '.' + extension))
@@ -64,7 +68,7 @@ def has_extension(path, expected_ext):
 
 def add_extension(path, suffix):
     """
-    return path + '.' + suffix
+    Returns path + '.' + suffix
     """
     return path + '.' + suffix
 
@@ -86,19 +90,6 @@ def rm_file(file_path):
     # Delete file if path is found. Does not raise error if path not found
     if file_path.exists():
         file_path.unlink()
-
-
-def conditional_import(name):
-    if name in sys.modules:
-        print(f"{name!r} already in sys.modules")
-    elif (spec := importlib.util.find_spec(name)) is not None:
-        # If you chose to perform the actual import ...
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[name] = module
-        spec.loader.exec_module(module)
-        print(f"{name!r} has been imported")
-    else:
-        print(f"can't find the {name!r} module")
 
 
 def get_platform_audio_ext():
