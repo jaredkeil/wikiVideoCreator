@@ -1,6 +1,6 @@
 import pyttsx3
 
-from wiki_movie.utils import has_extension, add_extension, change_extension, get_platform_audio_ext
+from wiki_movie.utils import has_extension, change_extension, get_platform_audio_ext
 
 
 def save(text, file_name):
