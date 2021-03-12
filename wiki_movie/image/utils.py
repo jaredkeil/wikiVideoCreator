@@ -35,8 +35,8 @@ def resize_subdirectory(s_img_dir, resized_images_dir):
     for file_name in file_names:
         try:
             maxsize_pad(str(s_img_dir / file_name), str(resized_images_dir / file_name))
-        except Exception:
-            print(f'error saving resized image: {file_name}')
+        except Exception as e:
+            print(f'{e} saving resized image {file_name}, e')
 
 
 def resize_image_directory(img_dir, out_dir):
