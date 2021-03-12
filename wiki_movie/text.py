@@ -1,6 +1,14 @@
 STOPWORDS = {'\n', '\t', 'e.g.', '[sic]', '[...]', 'i.e.', }
-EXCLUDED_SECTIONS = {'See also', 'References', 'Further reading', 'External links', 'Formats and track listings',
-                     'Credits and personnel', 'Charts', 'Certifications', 'Release history'}
+EXCLUDED_SECTIONS = {'See also',
+                     'References',
+                     'Further reading',
+                     'External links',
+                     'Formats and track listings',
+                     'Credits and personnel',
+                     'Charts',
+                     'Certifications',
+                     'Release history',
+                     'Notes'}  # can add to this as uncommon, unwanted section headers are discovered
 
 
 def generate_section_dictionaries_list(page):
