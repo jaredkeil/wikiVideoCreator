@@ -18,5 +18,6 @@ class DcttsNarrator(BaseNarrator):
 
     def make_narration(self, audio_dir):
         dc_tts.save_samples()
-        dc_tts.recombine_wavs(sample_dir=dc_tts.Hyperparams.sampledir,
+        dc_tts.recombine_wavs(script=self.script,
+                              sample_dir=dc_tts.Hyperparams.sampledir,
                               audio_dir=str(audio_dir))
