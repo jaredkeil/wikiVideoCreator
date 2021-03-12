@@ -4,7 +4,7 @@ from wiki_movie.utils import make_directory
 class BaseNarrator:
     def __init__(self, script):
         """
-        script (list) -- list of script dictionaries (as used in WikiMovie class)
+        script (list) -- list of script dicts as used in WikiMovie class
         """
         self.script = script
 
@@ -14,9 +14,11 @@ class BaseNarrator:
             self._narrate_section(script_section, audio_dir)
 
     def _narrate_section(self, section, audio_dir):
-        self._save_section(section['title'], audio_dir / (section['title']+'_header'))
+        self._save_section(section['title'],
+                           audio_dir / (section['title']+'_header'))
         if section['text']:
-            self._save_section(section['text'], audio_dir / (section['title']+'_text'))
+            self._save_section(section['text'],
+                               audio_dir / (section['title']+'_text'))
 
     def _save_section(self, *args, **kwargs):
         pass

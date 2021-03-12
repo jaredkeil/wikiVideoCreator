@@ -2,6 +2,7 @@ import pandas as pd
 from wikipediaapi import Wikipedia
 
 W_API = Wikipedia('en')
+TOP_25_URL = "https://en.wikipedia.org/wiki/Wikipedia:Top_25_Report"
 
 
 def wiki_page_list(url, n_pages=None, article_column='Article'):
@@ -12,7 +13,7 @@ def wiki_page_list(url, n_pages=None, article_column='Article'):
             selected_table = table
             break
     if selected_table is None:
-        raise KeyError(f'No column "{article_column}" found in any tables at {url}.')
+        raise KeyError(f'No column "{article_column}" in any tables at {url}.')
 
     if n_pages is None:
         n_pages = selected_table.shape[0]
@@ -20,4 +21,4 @@ def wiki_page_list(url, n_pages=None, article_column='Article'):
 
 
 def top25():
-    return wiki_page_list("https://en.wikipedia.org/wiki/Wikipedia:Top_25_Report", 25)
+    return wiki_page_list(TOP_25_URL, 25)

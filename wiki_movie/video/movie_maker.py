@@ -21,9 +21,13 @@ class WikiMovie:
     Make movies in mp4 from wikipedia pages.
     """
 
-    def __init__(self, title, narrator_name=None, narrator_args=None, downloader_args=None):
+    def __init__(self,
+                 title,
+                 narrator_name=None,
+                 narrator_args=None,
+                 downloader_args=None):
         """
-        Initialization parses response of wikipedia api into a readable script for narrator,
+        Initialization parses wikipedia api response into a readable script,
         then initializes narrator and image downloader.
 
         Call WikiMovie().make_movie() to generate video output in .mp4 format.
@@ -46,8 +50,10 @@ class WikiMovie:
 
         self.fmt = NARRATOR_FMTS[narrator_name]
 
-        narrator_module = importlib.import_module(f'wiki_movie.narrators.{narrator_name}')
-        self.narrator = narrator_module.build_narrator(self.script, **narrator_args)
+        narrator_module = importlib.import_module(
+                            f'wiki_movie.narrators.{narrator_name}')
+        self.narrator = narrator_module.build_narrator(self.script,
+                                                       **narrator_args)
 
         # ImageDownloader setup
         self.img_dir = DATA_DIR / 'images' / title
@@ -80,7 +86,12 @@ class WikiMovie:
         resize_image_directory(self.img_dir, self.resize_dir)
 
     def slideshow(self):
-        clips = [create_clip(s['title'], self.audio_dir, self.resize_dir, s['level'], bool(s['text']), self.fmt)
+        clips = [create_clip(s['title'],
+                             self.audio_dir,
+                             self.resize_dir,
+                             s['level'],
+                             bool(s['text']),
+                             self.fmt)
                  for s in self.script]
         video = add_outro(clips)
         save_video(clips=video, path=self.vid_path)

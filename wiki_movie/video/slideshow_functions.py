@@ -13,7 +13,7 @@ BLACK_GIZEH = (0, 0, 0)
 
 VIDEO_SIZE = (1920, 1080)
 IMG_SHAPE = (1080, 1920)
-IMG_DISPLAY_DURATION = 4
+IMG_DURATION = 4
 
 THANKS = "Thanks for watching \n and listening"
 SUBSCRIBE = "Please Subscribe!"
@@ -21,24 +21,24 @@ SUBSCRIBE = "Please Subscribe!"
 
 def create_clip(clip_title, audio_dir, image_dir, level, include_images, fmt):
     """
-    Creates section title text clip, and optionally a slideshow, which the narrator reads text over.
+    Creates section title text clip, a slideshow, and adds narrator audio.
 
     Args:
         clip_title (str) -- clip title
-        audio_dir (Path) -- location of audio, e.g. 'audio/<clip_title>/*.wav'
-        image_dir (Path) -- location of images (resized), e.g. 'images/python/resized/<clip_title>/*.jpg'
-        level (int) -- Defines section indentation level. 0 is highest level, 3 would mean 3 levels indented.
-        include_images (bool) -- If section contains text, this should be True, to generate image loop.
+        audio_dir (Path) -- e.g. 'audio/<clip_title>/*.wav'
+        image_dir (Path) -- e.g. 'images/python/resized/<clip_title>/*.jpg'
+        level (int) -- Indentation level. Higher means more indented.
+        include_images (bool) -- Should be true if section contains text.
         fmt (str) -- audio format which narrator used.
     Returns:
         clip (VideoClip) -- Combined TextClip and (optional) ImageSequence
     """
-    section_narration_path = str(audio_dir / clip_title)
+    audio_path = str(audio_dir / clip_title)
 
-    clip = narrated_header(clip_title, section_narration_path, level, fmt)
+    clip = narrated_header(clip_title, audio_path, level, fmt)
 
     if include_images or level == 0:
-        img_seq = narrated_image_seq(section_narration_path, image_dir / clip_title, fmt)
+        img_seq = narrated_image_seq(audio_path, image_dir / clip_title, fmt)
         clip = concatenate_videoclips([clip, img_seq], method='compose')
 
     print(clip_title, 'clip created!')
@@ -49,22 +49,29 @@ def create_clip(clip_title, audio_dir, image_dir, level, include_images, fmt):
 
 def narrated_header(section_title, narration_path, level, fmt):
     """
-    Create video which displays section title and attaches audio of narrator reading title."
+    Create video which displays section title
+    and attaches audio of narrator reading title."
     """
-    audio_clip_header = AudioFileClip(narration_path + f'_header.{fmt}').set_fps(1)
-    return (TextClip(section_title, color='white', fontsize=130 - (30 * level), size=VIDEO_SIZE, method='caption')
+    audio_clip_header = AudioFileClip(narration_path + f'_header.{fmt}'
+                                      ).set_fps(1)
+    return (TextClip(section_title,
+                     color='white',
+                     fontsize=130 - (30 * level),
+                     size=VIDEO_SIZE,
+                     method='caption')
             .set_audio(audio_clip_header)
             .set_duration(audio_clip_header.duration))
 
 
 def narrated_image_seq(narration_path, image_dir, fmt):
     """
-    Create video which displays looping slideshow of images and attaches audio of narrator reading section text."
+    Create video which displays looping slideshow of images
+    and attaches audio of narrator reading section text."
     """
     audio_clip_text = AudioFileClip(narration_path + f'_text.{fmt}').set_fps(1)
     images = files_in_directory(image_dir)
     return (ImageSequenceClip(sequence=images,
-                              durations=constant_list(IMG_DISPLAY_DURATION, len(images)),
+                              durations=const_list(IMG_DURATION, len(images)),
                               load_images=True)
             .set_position(('center', 400))
             .fx(vfx.loop, duration=audio_clip_text.duration)
@@ -72,20 +79,30 @@ def narrated_image_seq(narration_path, image_dir, fmt):
 
 
 def files_in_directory(directory):
-    return [str(p) for p in directory.glob('*') if p.is_file() and p.parts[-1][0] != '.']
+    return [str(p) for p in directory.glob('*')
+            if p.is_file() and p.parts[-1][0] != '.']
 
 
-def constant_list(val, n):
+def const_list(val, n):
     return [val for _ in range(n)]
 
 
 def add_outro(clips):
-    thx = TextClip(THANKS, color='white', fontsize=72, size=VIDEO_SIZE, method='caption').set_duration(2)
-    sub = TextClip(SUBSCRIBE, color='white', fontsize=72, size=VIDEO_SIZE, method='caption').set_duration(2)
-    return concatenate_videoclips(clips + [thx, sub], method='compose').on_color(color=BLACK, col_opacity=1)
+    thx = TextClip(THANKS, color='white', fontsize=72,
+                   size=VIDEO_SIZE, method='caption').set_duration(2)
+    sub = TextClip(SUBSCRIBE, color='white', fontsize=72,
+                   size=VIDEO_SIZE, method='caption').set_duration(2)
+
+    return concatenate_videoclips(clips + [thx, sub],
+                                  method='compose'
+                                  ).on_color(color=BLACK, col_opacity=1)
 
 
 def save_video(clips, path):
     make_directory(path.parent)
-    clips.write_videofile(str(path), fps=1, audio_codec='aac', preset='ultrafast', threads=2)
+    clips.write_videofile(str(path),
+                          fps=1,
+                          audio_codec='aac',
+                          preset='ultrafast',
+                          threads=2)
     clips.close()

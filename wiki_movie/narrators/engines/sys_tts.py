@@ -1,13 +1,13 @@
 import subprocess
 import sys
 
-from wiki_movie.utils import localtime_filepath, repository_root, make_directory, has_extension, add_extension, \
-    get_platform_audio_ext
+from wiki_movie.utils import localtime_filepath, repository_root, \
+    make_directory, has_extension, add_extension, get_platform_audio_ext
 
 
 def save_mac(message=None, file=None, voice='Alex', rate=200, file_name=None):
     if not (message or file):
-        raise ValueError('Must specify either message(str) or file (path to text file, as str)')
+        raise ValueError('Must specify either message or file')
 
     if message and file:
         raise ValueError('Can only specify one of either message or file')
@@ -54,6 +54,6 @@ def save(*args, **kwargs):
     elif platform == "darwin":
         save_mac(*args, **kwargs)
     elif platform == "win32":
-        raise NotImplementedError('Speech on Windows platform not implemented yet.')
+        raise NotImplementedError('Speech on Windows not implemented yet.')
     else:
         raise NotImplementedError(f'Unrecognized platform "{platform}".')

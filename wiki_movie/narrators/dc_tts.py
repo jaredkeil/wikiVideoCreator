@@ -8,9 +8,9 @@ def build_narrator(*args, **kwargs):
 
 class DcttsNarrator(BaseNarrator):
     def __init__(self, script, dctts_data_dir, *args, **kwargs):
-        title = script[0]['title']
-        dc_tts.Hyperparams.test_data = str(dctts_data_dir / 'text_input' / f'{title}.txt')
-        dc_tts.Hyperparams.sampledir = str(dctts_data_dir / 'samples' / title)
+        h = script[0]['title']
+        dc_tts.Hyperparams.test_data = str(dctts_data_dir / 'text_input' / f'{h}.txt')
+        dc_tts.Hyperparams.sampledir = str(dctts_data_dir / 'samples' / h)
 
         dc_tts.process_text_dctts(script, dc_tts.Hyperparams.test_data)
 

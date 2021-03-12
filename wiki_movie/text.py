@@ -8,14 +8,16 @@ EXCLUDED_SECTIONS = {'See also',
                      'Charts',
                      'Certifications',
                      'Release history',
-                     'Notes'}  # can add to this as uncommon, unwanted section headers are discovered
+                     'Notes'}  # can add as more are discovered
 
 
 def generate_section_dictionaries_list(page):
     """
     page (wikipediaapia.WikipediaPage)
     """
-    script = [{'title': page.title, 'level': 0, 'text': remove_stopwords(page.summary)}]
+    script = [{'title': page.title,
+               'level': 0,
+               'text': remove_stopwords(page.summary)}]
     print('Excluding sections: ', end='')
     flush_sections(script, page.sections)
     print('')
@@ -24,7 +26,7 @@ def generate_section_dictionaries_list(page):
 
 def flush_sections(script, sections, level=0):
     """
-    Recurse through page levels (sections, subsections) and clean the text, modifying script in place.
+    Recurse through page sections/subsections, and clean text in place.
 
     script (list)
     sections (list) -- list of WikipediaPageSections
@@ -35,7 +37,9 @@ def flush_sections(script, sections, level=0):
             print(f'{s.title},', end=' ')
             continue
         else:
-            script.append({'title': s.title, 'level': level + 1, 'text': remove_stopwords(s.text)})
+            script.append({'title': s.title,
+                           'level': level + 1,
+                           'text': remove_stopwords(s.text)})
             flush_sections(script, s.sections, level + 1)
 
 

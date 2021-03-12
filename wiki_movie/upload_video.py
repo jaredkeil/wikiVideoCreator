@@ -25,10 +25,14 @@ httplib2.RETRIES = 1
 MAX_RETRIES = 10
 
 # Always retry when these exceptions are raised.
-RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, http.client.NotConnected,
-                        http.client.IncompleteRead, http.client.ImproperConnectionState,
-                        http.client.CannotSendRequest, http.client.CannotSendHeader,
-                        http.client.ResponseNotReady, http.client.BadStatusLine)
+RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError,
+                        http.client.NotConnected,
+                        http.client.IncompleteRead,
+                        http.client.ImproperConnectionState,
+                        http.client.CannotSendRequest,
+                        http.client.CannotSendHeader,
+                        http.client.ResponseNotReady,
+                        http.client.BadStatusLine)
 
 # Always retry when an apiclient.errors.HttpError with one of these status
 # codes is raised.
@@ -49,7 +53,8 @@ sp = Path(__file__).resolve().parent / "client_secrets.json"
 CLIENT_SECRETS_FILE = str(sp)
 
 # This OAuth 2.0 access scope allows an application to upload files to the
-# authenticated user's YouTube channel, but doesn't allow other types of access.
+# authenticated user's YouTube channel, but doesn't allow other types of
+# access.
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
@@ -113,17 +118,17 @@ def initialize_upload(youtube, options):
         # onBehalfOfContentOwner="VIKPCo7Ds784w9qBk8xmxg",
         # onBehalfOfContentOwnerChannel="UCVIKPCo7Ds784w9qBk8xmxg",
         body=body,
-        # The chunksize parameter specifies the size of each chunk of data, in
-        # bytes, that will be uploaded at a time. Set a higher value for
-        # reliable connections as fewer chunks lead to faster uploads. Set a lower
-        # value for better recovery on less reliable connections.
+        # The chunksize parameter specifies the size of each chunk of data,
+        # in bytes, that will be uploaded at a time. Set a higher value for
+        # reliable connections as fewer chunks lead to faster uploads. Set a
+        # lower value for better recovery on less reliable connections.
         #
-        # Setting "chunksize" equal to -1 in the code below means that the entire
-        # file will be uploaded in a single HTTP request. (If the upload fails,
-        # it will still be retried where it left off.) This is usually a best
-        # practice, but if you're using Python older than 2.6 or if you're
-        # running on App Engine, you should set the chunksize to something like
-        # 1024 * 1024 (1 megabyte).
+        # Setting "chunksize" equal to -1 in the code below means that the
+        # entire file will be uploaded in a single HTTP request. (If the
+        # upload fails, it will still be retried where it left off.) This is
+        # usually a best practice, but if you're using Python older than 2.6
+        # or if you're running on App Engine, you should set the chunksize
+        # to something like 1024 * 1024 (1 megabyte).
         media_body=MediaFileUpload(options.file, chunksize=-1, resumable=True)
     )
 
@@ -173,18 +178,19 @@ if __name__ == '__main__':
                            default="Test Description")
     argparser.add_argument("--category", default="22",
                            help="Numeric video category. " +
-                                "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
-    argparser.add_argument("--keywords", help="Video keywords, comma separated",
-                           default="")
+                            "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
+    argparser.add_argument("--keywords",
+                           help="Video keywords, comma separated", default="")
     argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,
-                           default=VALID_PRIVACY_STATUSES[0], help="Video privacy status.")
+                           default=VALID_PRIVACY_STATUSES[0],
+                           help="Video privacy status.")
     args = argparser.parse_args()
 
     if not os.path.exists(args.file):
         exit("Please specify a valid file using the --file= parameter.")
 
-    youtube = get_authenticated_service(args)
+    youtube_service = get_authenticated_service(args)
     try:
-        initialize_upload(youtube, args)
+        initialize_upload(youtube_service, args)
     except HttpError as e:
         print("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))

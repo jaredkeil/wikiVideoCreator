@@ -14,4 +14,7 @@ class SystemNarrator(BaseNarrator):
         super().__init__(script)
 
     def _save_section(self, text, path):
-        self._save(message=text, voice=self.voice, rate=self.rate, file_name=str(path))
+        self._save(message=text,
+                   voice=self.voice,
+                   rate=self.rate,
+                   file_name=str(path))
