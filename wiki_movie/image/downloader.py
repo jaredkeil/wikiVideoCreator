@@ -10,7 +10,6 @@
 import os
 from pathlib import Path
 import sys
-import time
 import logging
 import urllib.request
 import urllib.error
@@ -19,7 +18,7 @@ from urllib.parse import urlparse, quote
 from user_agent import generate_user_agent
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from selenium.common.exceptions import NoSuchAttributeException, ElementNotInteractableException, TimeoutException, \
+from selenium.common.exceptions import ElementNotInteractableException, TimeoutException, \
     ElementClickInterceptedException
 from selenium.webdriver.support.wait import WebDriverWait
 import selenium.webdriver.support.expected_conditions as EC
@@ -46,7 +45,8 @@ class ImageDownloader:
         self.url_dir = url_dir if url_dir else Path.cwd() / 'data' / 'url_files'
         self.img_dir = img_dir if img_dir else Path.cwd() / 'data' / 'images' / main_keyword
         self.num_requested = num_requested
-        self.wait_time = {'very slow': 7, 'slow': 3, 'medium': 1, 'fast': 0.5, 'very fast': .25}.get(connection_speed, 1)
+        self.wait_time = {'very slow': 7, 'slow': 3, 'medium': 1, 'fast': 0.5, 'very fast': .25
+                          }.get(connection_speed, 1)
         self.headless = headless
         self.img_urls = set()
         self._boot_driver()
@@ -116,7 +116,8 @@ class ImageDownloader:
         i = 0
         while len(urls) < self.num_requested and i < len(thumbs):
             # print(f"Finding URL's [{'#' * (n_found + 1) + ' ' * (self.num_requested - n_found)}]   \r")
-            sys.stdout.write(f"Finding {self.num_requested} URL's [{'#' * n_found + ' ' * (self.num_requested - n_found)}]   \r")
+            sys.stdout.write(
+                f"Finding {self.num_requested} URL's [{'#' * n_found + ' ' * (self.num_requested - n_found)}]   \r")
             sys.stdout.flush()
             src = self._extract_src_from_thumb(thumbs[i])
             if src:
@@ -129,7 +130,7 @@ class ImageDownloader:
         try:
             WebDriverWait(self.driver, self.wait_time).until(element_is_clickable(thumb)).click()
         except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException) as e:
-            pass
+            logging.error(f'Error clicking thumbnail: {e}')
 
         try:
             elements = self.driver.find_elements(*GoogleImagesLocators.URLS_IN_THUMBS)
@@ -138,7 +139,7 @@ class ImageDownloader:
             if src.startswith('http') and not src.startswith('https://encrypted-tbn0.gstatic.com'):
                 return {src}
         except (IndexError, Exception) as e:
-            pass
+            logging.error(f'Error extracting "src" attribute: {e}')
 
         return set()
 
