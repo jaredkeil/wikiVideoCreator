@@ -103,6 +103,5 @@ def save_video(clips, path):
     clips.write_videofile(str(path),
                           fps=1,
                           audio_codec='aac',
-                          preset='ultrafast',
-                          threads=2)
+                          preset='ultrafast')
     clips.close()
