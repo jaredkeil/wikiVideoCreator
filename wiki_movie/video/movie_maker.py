@@ -108,7 +108,7 @@ class WikiMovie:
 
 
 def main(args):
-    movie = WikiMovie(title=args.title,
+    movie = WikiMovie(title=" ".join(args.title),
                       narrator_name=args.narrator,
                       narrator_args=parse_narrator_args(args),
                       downloader_args=parse_downloader_args(args))
@@ -136,23 +136,33 @@ def parse_downloader_args(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Make movie from wikipedia article.")
+    parser = argparse.ArgumentParser(description="Make movie from "
+                                                 "wikipedia article.")
     parser.add_argument('title', nargs='+', help='wikipedia article title')
-    parser.add_argument('-n', '--narrator', choices=('sys_tts', 'google_tts', 'py_tts', 'dc_tts'),
+    parser.add_argument('-n', '--narrator',
+                        choices=('sys_tts', 'google_tts', 'py_tts', 'dc_tts'),
                         help='text to speech method')
 
     tts_args = parser.add_argument_group('narrator arguments (optional)')
-    tts_args.add_argument('-v', '--voice', help='voice of sys_tts - available voices dependant on platform')
+    tts_args.add_argument('-v', '--voice',
+                          help='voice of sys_tts - '
+                               'available voices dependant on platform')
     tts_args.add_argument('-r', '--rate', help='words per minute of sys_tts')
 
-    img_dl_args = parser.add_argument_group('image downloader arguments (optional)')
-    img_dl_args.add_argument('-i', '--image_count', type=int, help='how many images per section')
-    img_dl_args.add_argument('-c', '--connect_speed', choices=('very slow', 'slow', 'medium', 'fast', 'very fast'),
-                             help='how fast the webdriver clicks on search results')
-    img_dl_args.add_argument('-w', '--watch', action='store_true', help='run browser in non-headless mode')
+    img_dl_args = parser.add_argument_group('image downloader arguments '
+                                            '(optional)')
+    img_dl_args.add_argument('-i', '--image_count', type=int,
+                             help='how many images per section')
+    img_dl_args.add_argument('-c', '--connect_speed',
+                             choices=('very slow', 'slow', 'medium',
+                                      'fast', 'very fast'),
+                             help='how fast the webdriver clicks '
+                                  'on search results')
+    img_dl_args.add_argument('-w', '--watch', action='store_true',
+                             help='run browser in non-headless mode')
 
-    options = parser.parse_args(['hello', '-v', 'somevoice', '-i', '10'])
-
+    # options = parser.parse_args(['Condyle', '-v', 'Alex', '-i', '10'])
+    options = parser.parse_args()
     print(options)
 
     main(options)
