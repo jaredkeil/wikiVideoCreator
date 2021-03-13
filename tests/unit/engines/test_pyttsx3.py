@@ -1,6 +1,7 @@
 import time
 import os
 from unittest import skip
+import pytest
 
 import pyttsx3
 from wiki_movie.utils import localtime_filepath
@@ -18,18 +19,22 @@ class Pyttsx3Test(BaseEngineTest):
         self.engine.say(text)
         self.engine.runAndWait()
 
+    @pytest.mark.timeout(1)
     def test_save_to_aiff(self):
-        text = 'If there is no audio after this sentence, the test failed. If hearing this then test passed.'
+        text = 'If there is no audio after this sentence, the test failed. ' \
+               'If hearing this then test passed.'
         file_path = localtime_filepath(self.audio_dir, 'aiff')
         self.engine.save_to_file(text, file_path)
         self.engine.runAndWait()
 
+    @pytest.mark.timeout(1)
     def test_save_to_mp3(self):
         text = 'If there is no audio after this sentence, the test failed. If hearing this then test passed.'
         file_path = localtime_filepath(self.audio_dir, 'mp3')
         self.engine.save_to_file(text, file_path)
         self.engine.runAndWait()
 
+    @pytest.mark.timeout(1)
     def test_save_to_wav(self):
         text = 'If there is no audio after this sentence, the test failed. If hearing this then test passed.'
         file_path = localtime_filepath(self.audio_dir, 'wav')
