@@ -86,7 +86,7 @@ class ImageDownloader:
 
     def _search_for_images(self, keyword):
         print(f'Searching for "{self.main_keyword + " " + keyword}"')
-        formatted_query = quote(self.main_keyword + ' ' + keyword)
+        formatted_query = quote((self.main_keyword + ' ' + keyword).strip())
         self.driver.get("https://www.google.com/search?q=" + formatted_query
                         + "&source=lnms&tbm=isch")
 
@@ -133,7 +133,8 @@ class ImageDownloader:
                 element_is_clickable(thumb)).click()
         except (TimeoutException, ElementNotInteractableException,
                 ElementClickInterceptedException) as e:
-            logging.error(f'Error clicking thumbnail: {e}')
+            logging.warning(f'Error clicking thumbnail: {e}')
+            # only warning because more will be tried until num_requested met.
 
         try:
             elements = self.driver.find_elements(
@@ -144,7 +145,7 @@ class ImageDownloader:
             if src.startswith('http') and not src.startswith('https://encrypted-tbn0.gstatic.com'):
                 return {src}
         except (IndexError, Exception) as e:
-            logging.error(f'Error extracting "src" attribute: {e}')
+            logging.warning(f'Error extracting "src" attribute: {e}')
 
         return set()
 
