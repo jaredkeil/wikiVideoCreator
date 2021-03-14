@@ -1,8 +1,8 @@
-from pathlib import Path
 import os
+from pathlib import Path
 import shutil
-import time
 import sys
+import time
 
 
 repository_root = Path(__file__).resolve().parents[1]
