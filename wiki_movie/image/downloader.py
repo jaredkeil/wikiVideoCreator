@@ -1,19 +1,19 @@
 import os
-from pathlib import Path
-import sys
 import logging
-import urllib.request
+from pathlib import Path
 import urllib.error
 from urllib.parse import urlparse, quote
+import urllib.request
+import sys
 
-from user_agent import generate_user_agent
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import ElementNotInteractableException, \
     TimeoutException, ElementClickInterceptedException
 from selenium.webdriver.support.wait import WebDriverWait
-import selenium.webdriver.support.expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.remote.webelement import WebElement
+from user_agent import generate_user_agent
 
 from wiki_movie.image.google_images_locators import GoogleImagesLocators
 from wiki_movie.utils import write_seq_to_file, make_directory, file_len
@@ -93,9 +93,10 @@ class ImageDownloader:
     def _show_more_results(self):
         # Scroll, loading more image results. Click 'More results' if possible
         try:
-            more_results_element = WebDriverWait(self.driver, 1).until(
-                EC.element_to_be_clickable(GoogleImagesLocators.MORE_RESULTS))
-            more_results_element.click()
+            WebDriverWait(self.driver, 1).until(
+                expected_conditions.element_to_be_clickable(
+                    GoogleImagesLocators.MORE_RESULTS)
+            ).click()
         except (TimeoutException, ElementNotInteractableException):
             pass
 
@@ -104,9 +105,9 @@ class ImageDownloader:
     def _get_thumbnails(self):
         try:
             thumbnails = WebDriverWait(self.driver, 10).until(
-                n_elements_clickable(GoogleImagesLocators.THUMBNAILS,
-                                     self.num_requested)
-            )
+                n_elements_clickable(
+                    GoogleImagesLocators.THUMBNAILS,
+                    self.num_requested))
             return set(thumbnails)
         except TimeoutException:
             return set()
@@ -130,7 +131,8 @@ class ImageDownloader:
     def _extract_src_from_thumb(self, thumb):
         try:
             WebDriverWait(self.driver, self.wait_time).until(
-                element_is_clickable(thumb)).click()
+                element_is_clickable(thumb)
+            ).click()
         except (TimeoutException, ElementNotInteractableException,
                 ElementClickInterceptedException) as e:
             logging.warning(f'Error clicking thumbnail: {e}')
