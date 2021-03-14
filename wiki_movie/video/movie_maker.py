@@ -1,15 +1,16 @@
+import argparse
 import importlib
 import sys
-import argparse
 
 from wikipediaapi import Wikipedia
 
 from wiki_movie.image import ImageDownloader, resize_image_directory
 from wiki_movie.text import generate_section_dictionaries_list
-from wiki_movie.video.slideshow_functions import create_clip, add_outro, save_video
+from wiki_movie.video import slideshow_functions
 from wiki_movie import utils
 
 W_API = Wikipedia('en')
+
 DATA_DIR = utils.repository_root / 'data'
 PLATFORM_AUDIO_EXT = utils.get_platform_audio_ext()
 NARRATOR_FMTS = {'sys_tts': PLATFORM_AUDIO_EXT, 'py_tts': PLATFORM_AUDIO_EXT,
@@ -51,7 +52,7 @@ class WikiMovie:
         self.fmt = NARRATOR_FMTS[narrator_name]
 
         narrator_module = importlib.import_module(
-                            f'wiki_movie.narrators.{narrator_name}')
+            f'wiki_movie.narrators.{narrator_name}')
         self.narrator = narrator_module.build_narrator(self.script,
                                                        **narrator_args)
 
@@ -86,15 +87,16 @@ class WikiMovie:
         resize_image_directory(self.img_dir, self.resize_dir)
 
     def slideshow(self):
-        clips = [create_clip(s['title'],
-                             self.audio_dir,
-                             self.resize_dir,
-                             s['level'],
-                             bool(s['text']),
-                             self.fmt)
-                 for s in self.script]
-        video = add_outro(clips)
-        save_video(clips=video, path=self.vid_path)
+        clips = [slideshow_functions.create_clip(
+            s['title'],
+            self.audio_dir,
+            self.resize_dir,
+            s['level'],
+            bool(s['text']),
+            self.fmt) for s in self.script]
+
+        video = slideshow_functions.add_outro(clips)
+        slideshow_functions.save_video(clips=video, path=self.vid_path)
 
     def delete_assets(self):
         for _dir in self._directories:

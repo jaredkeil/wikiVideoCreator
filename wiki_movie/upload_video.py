@@ -1,4 +1,4 @@
-# !/usr/bin/python
+# !/usr/bin/python3
 
 import http.client
 import httplib2
@@ -61,21 +61,20 @@ YOUTUBE_API_VERSION = "v3"
 
 # This variable defines a message to display if the CLIENT_SECRETS_FILE is
 # missing.
-MISSING_CLIENT_SECRETS_MESSAGE = """
+MISSING_CLIENT_SECRETS_MESSAGE = f"""
 WARNING: Please configure OAuth 2.0
 
 To make this sample run you will need to populate the client_secrets.json file
 found at:
 
-   %s
+   {os.path.abspath(os.path.join(os.path.dirname(__file__),CLIENT_SECRETS_FILE))}
 
 with information from the API Console
 https://console.developers.google.com/
 
 For more information about the client_secrets.json file format, please visit:
 https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-""" % os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                   CLIENT_SECRETS_FILE))
+"""
 
 VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
@@ -85,7 +84,7 @@ def get_authenticated_service(options):
                                    scope=YOUTUBE_UPLOAD_SCOPE,
                                    message=MISSING_CLIENT_SECRETS_MESSAGE)
 
-    storage = Storage("%s-oauth2.json" % sys.argv[0])
+    storage = Storage(f"{sys.argv[0]}-oauth2.json")
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
@@ -147,13 +146,15 @@ def resumable_upload(insert_request):
             status, response = insert_request.next_chunk()
             if response is not None:
                 if 'id' in response:
-                    print("Video id '%s' was successfully uploaded." % response['id'])
+                    print("Video id '%s' was successfully uploaded."
+                          % response['id'])
                 else:
-                    exit("The upload failed with an unexpected response: %s" % response)
+                    exit("The upload failed with an unexpected response: %s"
+                         % response)
         except HttpError as e:
             if e.resp.status in RETRIABLE_STATUS_CODES:
-                error = "A retriable HTTP error %d occurred:\n%s" % (e.resp.status,
-                                                                     e.content)
+                error = "A retriable HTTP error %d occurred:\n%s" \
+                        % (e.resp.status, e.content)
             else:
                 raise
         except RETRIABLE_EXCEPTIONS as e:
@@ -172,13 +173,15 @@ def resumable_upload(insert_request):
 
 
 if __name__ == '__main__':
-    argparser.add_argument("--file", required=True, help="Video file to upload")
+    argparser.add_argument("--file", required=True,
+                           help="Video file to upload")
     argparser.add_argument("--title", help="Video title", default="Test Title")
     argparser.add_argument("--description", help="Video description",
                            default="Test Description")
     argparser.add_argument("--category", default="22",
                            help="Numeric video category. " +
-                            "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
+                                "See https://developers.google.com/youtube/v3/"
+                                "docs/videoCategories/list")
     argparser.add_argument("--keywords",
                            help="Video keywords, comma separated", default="")
     argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,
@@ -192,5 +195,5 @@ if __name__ == '__main__':
     youtube_service = get_authenticated_service(args)
     try:
         initialize_upload(youtube_service, args)
-    except HttpError as e:
-        print("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
+    except HttpError as hE:
+        print("An HTTP error %d occurred:\n%s" % (hE.resp.status, hE.content))

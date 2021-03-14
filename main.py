@@ -1,50 +1,51 @@
 import argparse
 import subprocess
 
-from wiki_movie.upload_video import __file__ as uploader
-from wiki_movie.video.movie_maker import WikiMovie, parse_narrator_args, parse_downloader_args
+from wiki_movie import upload_video
 from wiki_movie.resources import top25, wiki_page_list
+from wiki_movie.video import movie_maker
 
 
 def upload(video_path, title, description, private=False):
-    privacy = 'private' if private else 'public'
-
-    cmd_args = ['python', uploader,
+    cmd_args = ['python', upload_video.__file__,
                 f'--file={video_path}',
                 f'--title={title}',
                 f'--description={description}',
                 f'--keywords=',
                 '--category=27',
-                f'--privacyStatus={privacy}',
+                f'--privacyStatus={"private" if private else "public"}',
                 '--noauth_local_webserver']
 
-    print(cmd_args)
+    print('UPLOAD\n'
+          '------\n'
+          + ' '.join(cmd_args))
 
     subprocess.run(cmd_args)
 
 
 def main(args):
-    if args.single_page:
-        titles = [" ".join(args.single_page)]
-
-    elif args.top25:
+    if args.top25:
         titles = top25()
 
     elif args.url:
         titles = wiki_page_list(args.url, args.n_pages)
 
+    else:
+        titles = [" ".join(args.single_page)]
+
     for title in titles:
         try:
             print(f'Initializing WikiMovie for "{title}"')
-            movie = WikiMovie(title,
-                              args.narrator,
-                              parse_narrator_args(args),
-                              parse_downloader_args(args))
+            movie = movie_maker.WikiMovie(
+                title,
+                args.narrator,
+                movie_maker.parse_narrator_args(args),
+                movie_maker.parse_downloader_args(args))
 
             movie.make_movie(args.overwrite)
 
             if args.upload:
-                upload(movie.vid_path,
+                upload(str(movie.vid_path),
                        movie.script[0]['title'],
                        movie.script[0]['text'],
                        args.private)
@@ -63,8 +64,8 @@ if __name__ == '__main__':
                                                  'upload via YouTube API.')
 
     # Required arguments
-    exgroup = parser.add_argument_group(title='Mode (only pick one)')
-    mode = exgroup.add_mutually_exclusive_group(required=True)
+    mode_group = parser.add_argument_group(title='Mode (only pick one)')
+    mode = mode_group.add_mutually_exclusive_group(required=True)
     mode.add_argument('-s', '--single_page', nargs='+',
                       help='name of one specific page')
     mode.add_argument('-t', '--top25', action='store_true',
@@ -110,7 +111,6 @@ if __name__ == '__main__':
                                       'for timeout')
     downloader_args.add_argument('-w', '--watch', action='store_true',
                                  help='run browser in non-headless mode')
-
     options = parser.parse_args()
     print(options)
     main(options)
