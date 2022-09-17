@@ -1,4 +1,4 @@
-# create videos from Wikipedia articles
+# Create videos from Wikipedia articles
 
 Turn Wikipedia articles into videos with computer-generated overdubbing, and the option to upload directly to YouTube.
 Includes helpful parsers for Wikipedia API requests, as well as a module for downloading pictures from Google image searches.
